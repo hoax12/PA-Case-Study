@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Human-in-the-loop patient document extraction review"
+    />
+    <title>ClarityPA · Intake Copilot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 40 40" role="img">
+              <path d="M20 4 34 9v10c0 8.7-5.8 14.8-14 17-8.2-2.2-14-8.3-14-17V9l14-5Z" />
+              <path class="pulse" d="M10 21h6l2-6 4 12 2.5-6H30" />
+            </svg>
+          </div>
+          <div>
+            <div class="brand-name">Clarity<span>PA</span></div>
+            <div class="brand-subtitle">Clinical intake copilot</div>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <span class="privacy-chip"><i></i> Local prototype</span>
+          <span id="providerBadge" class="provider-badge">Connecting…</span>
+          <button class="header-reset hidden" type="button" data-reset-intake>Reset intake</button>
+          <div class="avatar" aria-label="Clinical reviewer">CR</div>
+        </div>
+      </header>
+
+      <main>
+        <section class="hero">
+          <div>
+            <div class="eyebrow">PRIOR AUTHORIZATION · INTAKE</div>
+            <h1>Turn patient documents into<br /><span>reviewable evidence.</span></h1>
+            <p>
+              Watch the orchestration agent transcribe images, extract structured
+              clinical entities, retrieve bariatric policy evidence, and preserve
+              uncertainty for human verification.
+            </p>
+          </div>
+          <div class="hero-stat">
+            <div class="stat-orbit"><span>3</span></div>
+            <div><strong>Bounded tools</strong><small>OCR → NER → Guideline RAG</small></div>
+          </div>
+        </section>
+
+        <section id="uploadPanel" class="upload-card">
+          <div class="upload-copy">
+            <span class="step-label">NEW INTAKE</span>
+            <h2>Upload patient documents</h2>
+            <p>PNG, JPEG, or WebP · up to <span id="maxUpload">12</span> MB each</p>
+          </div>
+          <label id="dropzone" class="dropzone" tabindex="0" for="fileInput">
+            <input id="fileInput" class="visually-hidden" type="file" accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp" multiple />
+            <div class="upload-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" /></svg>
+            </div>
+            <div><strong>Choose or drop documents</strong><span>Selecting again adds more files</span></div>
+            <span class="browse-button">Browse</span>
+          </label>
+          <div id="fileList" class="file-list"></div>
+          <div id="fixtureNotice" class="notice hidden"></div>
+          <div class="upload-actions">
+            <button id="clearFilesButton" class="secondary-button hidden" type="button">Clear</button>
+            <button id="analyzeButton" class="primary-button" type="button" disabled>
+              <span>Start extraction</span>
+              <svg viewBox="0 0 20 20"><path d="m7 4 6 6-6 6" /></svg>
+            </button>
+          </div>
+        </section>
+
+        <section id="workspace" class="workspace hidden">
+          <div class="progress-card">
+            <div class="progress-head">
+              <div>
+                <span class="step-label">WORKFLOW</span>
+                <h2>Agent progress</h2>
+              </div>
+              <div class="progress-actions">
+                <div id="jobStatus" class="status-pill running"><span></span> Running</div>
+                <button class="secondary-button compact" type="button" data-reset-intake>New intake</button>
+              </div>
+            </div>
+            <div class="progress-track">
+              <div class="progress-line"><span id="progressFill"></span></div>
+              <div class="progress-step" data-stage="upload"><i>1</i><b>Upload</b><small>Documents received</small></div>
+              <div class="progress-step" data-stage="ocr"><i>2</i><b>OCR</b><small>Transcribe images</small></div>
+              <div class="progress-step" data-stage="ner"><i>3</i><b>Clinical NER</b><small>Extract entities</small></div>
+              <div class="progress-step" data-stage="grounding"><i>4</i><b>Guideline RAG</b><small>Retrieve cited criteria</small></div>
+              <div class="progress-step" data-stage="review"><i>5</i><b>Human review</b><small>Verify uncertainty</small></div>
+            </div>
+          </div>
+
+          <div id="metrics" class="metrics hidden">
+            <div class="metric"><span>Documents</span><strong id="metricDocs">—</strong><small>processed</small></div>
+            <div class="metric"><span>Entities</span><strong id="metricEntities">—</strong><small>extracted</small></div>
+            <div class="metric"><span>Avg. confidence</span><strong id="metricConfidence">—</strong><small>prototype signal</small></div>
+            <div class="metric"><span>Policy criteria</span><strong id="metricCriteria">—</strong><small>preliminary matrix</small></div>
+            <div class="metric alert"><span>Needs review</span><strong id="metricReview">—</strong><small>low / medium confidence</small></div>
+          </div>
+
+          <div class="review-grid">
+            <article class="panel document-panel">
+              <div class="panel-head">
+                <div><span class="step-label">SOURCE</span><h2>Patient documents</h2></div>
+                <div id="documentTabs" class="document-tabs"></div>
+              </div>
+              <div class="document-stage">
+                <img id="documentImage" alt="Uploaded patient document" />
+                <div id="documentEmpty" class="document-empty">Document preview will appear here.</div>
+              </div>
+              <details class="ocr-details">
+                <summary>View OCR transcript <span id="ocrConfidence"></span></summary>
+                <pre id="ocrTranscript">Waiting for OCR…</pre>
+              </details>
+            </article>
+
+            <article class="panel extraction-panel">
+              <div class="panel-head">
+                <div><span class="step-label">HUMAN-IN-THE-LOOP</span><h2>Extracted patient data</h2></div>
+                <div class="legend"><span class="high"></span>High <span class="medium"></span>Review <span class="low"></span>Low</div>
+              </div>
+              <div id="reviewReasons" class="review-callout hidden"></div>
+              <div id="entityGroups" class="entity-table-region">
+                <div class="skeleton-list">
+                  <span></span><span></span><span></span><span></span>
+                </div>
+              </div>
+              <div id="missingFields" class="missing-fields hidden"></div>
+            </article>
+          </div>
+
+          <article id="groundingPanel" class="panel grounding-panel hidden">
+            <div class="panel-head grounding-head">
+              <div>
+                <span class="step-label">GROUNDED POLICY REVIEW</span>
+                <h2>Preliminary bariatric criteria matrix</h2>
+              </div>
+              <div class="policy-meta">
+                <span id="policyNumber">Policy —</span>
+                <span id="policyEffective">Effective —</span>
+              </div>
+            </div>
+            <div class="grounding-disclaimer">
+              Decision support only. This prototype retrieves policy evidence and surfaces
+              missing facts; it does not approve, deny, or determine medical necessity.
+            </div>
+            <p id="groundingSummary" class="grounding-summary"></p>
+            <div id="groundingWarnings" class="grounding-warnings hidden"></div>
+            <div class="criteria-table-scroll">
+              <table class="criteria-table">
+                <thead>
+                  <tr><th>Criterion</th><th>Status</th><th>Patient evidence</th><th>Policy citation</th><th>Reasoning</th></tr>
+                </thead>
+                <tbody id="criteriaRows"></tbody>
+              </table>
+            </div>
+            <details class="passage-details">
+              <summary>View retrieved policy passages <span id="passageCount"></span></summary>
+              <div id="retrievedPassages" class="retrieved-passages"></div>
+            </details>
+          </article>
+
+          <article class="panel activity-panel">
+            <div class="panel-head">
+              <div><span class="step-label">LIVE TRACE</span><h2>Agent activity</h2></div>
+              <span class="live-indicator"><i></i> Event stream</span>
+            </div>
+            <div id="activityFeed" class="activity-feed"></div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <div id="toast" class="toast" role="status"></div>
+    <script src="/static/app.js" defer></script>
+  </body>
+</html>

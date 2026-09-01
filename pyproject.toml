@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "prior-auth-intake-copilot"
+version = "0.1.0"
+description = "Google ADK prototype for OCR, clinical entity review, and cited guideline grounding"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "aiosqlite>=0.20,<1",
+  "fastapi>=0.115,<1",
+  "faiss-cpu>=1.12,<2",
+  "google-adk>=2.8,<3",
+  "google-genai>=2.19,<3",
+  "numpy>=1.26,<3",
+  "pillow>=11,<12",
+  "pydantic>=2.10,<3",
+  "pydantic-settings>=2.7,<3",
+  "pypdf>=6,<7",
+  "python-multipart>=0.0.20,<1",
+  "sentence-transformers>=5.1,<6",
+  "sqlalchemy>=2.0,<3",
+  "uvicorn[standard]>=0.34,<1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "httpx>=0.28,<1",
+  "pytest>=8.3,<9",
+  "pytest-asyncio>=0.25,<1",
+]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = "--basetemp=.pytest-tmp"

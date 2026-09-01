@@ -1,0 +1,12 @@
+.env
+.venv/
+*.egg-info/
+__pycache__/
+.pytest_cache/
+.pytest-tmp/
+*.py[cod]
+data/*.db
+data/*.db-*
+data/uploads/
+knowledge/index/
+tmp/
