@@ -26,6 +26,10 @@ Complete this before the presentation:
 10. Never display the `.env` file or API key during screen sharing.
 11. Avoid real patient data; use only the approved case-study samples.
 
+For the knowledge status check, also confirm `runtime_ready: true`, the expected
+policy/effective date, and a non-empty chunk count. A present PDF without a ready
+embedding runtime is not sufficient for a reliable live demo.
+
 Commands:
 
 ```powershell
@@ -95,6 +99,10 @@ Then show the criteria matrix and retrieved passages. The supplied infant note
 and blank PA form are intentionally insufficient for bariatric eligibility, so
 the correct outcome is mostly/all `Unknown`—not a fabricated denial. Point to a
 page citation and explain that the matrix is preliminary decision support.
+
+Open “View retrieved policy passages” and connect one matrix row to its source
+page and section. This demonstrates the full claim-to-source chain rather than
+presenting RAG as a generic PDF chat experience.
 
 ### 5. Evaluation and tradeoffs — 2 minutes
 

@@ -41,7 +41,8 @@ authorization. The matrix is decision support and always requires human review.
 - Page/section citations, retrieval scores, and a preliminary criteria matrix;
   missing patient facts remain `unknown`.
 - Automated tests for data contracts, uncertainty, confidence gating,
-  persistence, and the fixture API workflow.
+  PDF scope, FAISS retrieval, conservative grounding, persistence, and the
+  complete fixture API workflow.
 
 ## Documentation
 
@@ -82,6 +83,32 @@ Google ADK Runner ────────────────────�
 SSE event stream ──────────────────────► Reviewer UI
 ```
 
+## RAG pipeline at a glance
+
+```text
+BariatricSurgery.pdf
+        │ pypdf · operative pages 1–7
+        ▼
+Page/section-aware chunks ──► MiniLM embeddings ──► FAISS IndexFlatIP
+                                                        │
+Patient extraction ──► facet queries ──► FAISS candidates
+                                                        │
+                         lexical subsection rerank ◄────┘
+                                      │
+                                      ▼
+                         page-cited policy passages
+                                      │
+                    Gemini matrix or conservative fallback
+                                      │
+                                      ▼
+                 citation/evidence validation ──► reviewer UI
+```
+
+The supplied policy currently produces 17 chunks. Grounding retrieves up to
+eight passages across pathway, BMI/age, SADI-S, TORe, preparation, and exclusion
+facets. A `met` or `not_met` status is retained only when both literal patient
+evidence and an allowed retrieved citation survive application validation.
+
 ## Quick start
 
 Python 3.11 or newer is required.
@@ -106,6 +133,14 @@ Build the local guideline index once after installation:
 .\.venv\Scripts\python.exe scripts\build_guideline_index.py
 ```
 
+Confirm the source, index, and local embedding runtime before a demo:
+
+```powershell
+curl.exe -sS http://127.0.0.1:8000/api/knowledge/status
+```
+
+Expected readiness fields are `"ready": true` and `"runtime_ready": true`.
+
 Start the application:
 
 ```powershell
@@ -118,6 +153,10 @@ is at [http://127.0.0.1:8000/api/docs](http://127.0.0.1:8000/api/docs).
 Without a key, `EXTRACTION_PROVIDER=auto` selects the clearly labeled fixture
 mode. Fixture mode recognizes only `med2.webp` and
 `Prior-Authorization-Form.jpg` and is not a live-model evaluation.
+
+The supplied note and blank form are intentionally not a complete bariatric
+packet. Their expected grounding result is an all-`unknown` criteria matrix,
+which demonstrates safe missing-evidence behavior rather than eligibility.
 
 ## Test
 

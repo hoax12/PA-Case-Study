@@ -45,6 +45,21 @@ curl.exe -sS http://127.0.0.1:8000/api/knowledge/status
 
 Both `ready` and `runtime_ready` should be `true` before a presentation.
 
+### Current prototype snapshot
+
+| Property | Value |
+|---|---|
+| Policy | Mass General Brigham Health Plan Bariatric Surgery, Policy 008 |
+| Effective date | July 1, 2026 |
+| Indexed pages | 1–7 operative content |
+| Excluded pages | 8–11 bibliography/reference material |
+| Current chunk count | 17 |
+| Embedding model | `sentence-transformers/all-MiniLM-L6-v2` |
+| Vector index | FAISS `IndexFlatIP` |
+| Default grounded passages | Up to 8 |
+| Minimum candidate score | 0.22 |
+| Decision state | Always `requires_human_review` |
+
 ## Indexing design
 
 1. `pypdf` extracts page text.
@@ -58,6 +73,33 @@ Both `ready` and `runtime_ready` should be `true` before a presentation.
 The small local model and exact FAISS index were chosen for a fast, reproducible
 three-day prototype. They are not assumed to be the best production retrieval
 stack.
+
+## Runtime data flow
+
+```text
+temp:ocr_result
+      │
+      ▼
+temp:extraction_result
+      │
+      ├── patient facts + missing fields ──► grounding query
+      │
+      ▼
+ground_bariatric_guidelines
+      ├── multi-facet FAISS retrieval
+      ├── structured Gemini assessment or conservative fallback
+      ├── citation and literal-evidence validation
+      └── temp:guideline_grounding
+                    │
+                    ├── review.db / jobs.grounding_json
+                    ├── SSE tool result summary
+                    └── cited criteria matrix in the UI
+```
+
+ADK SQLite stores agent/session memory. The separate review database stores the
+domain output required by the API, UI restore path, reviewer workflow, and audit
+discussion. A completed `?job=<id>` URL replays persisted event summaries, so a
+saved demo retains the OCR, NER, and grounding trace.
 
 ## Retrieval design
 
@@ -101,6 +143,22 @@ does not cover the full concept.
 The supplied handwritten pediatric note and blank PA form do not contain a
 bariatric request, plan, BMI, or surgery history. An all-unknown matrix is
 therefore the expected safe result, not a workflow failure.
+
+## Failure behavior
+
+| Condition | Prototype behavior | Safety implication |
+|---|---|---|
+| Guideline source missing | Index build fails visibly | No ungrounded policy answer |
+| Local embedding model missing | Startup status exposes `runtime_error` | Operator rebuilds before demo |
+| Source hash/model changed | Existing index is invalidated and rebuilt | Prevents silent stale-vector reuse |
+| No passage clears threshold | All criteria become `unknown` | Missing retrieval is not treated as failure evidence |
+| Gemini assessment unavailable | Conservative deterministic matrix | Retrieval remains usable without fabricated status |
+| Model emits an unknown citation | Citation is removed; criterion becomes `unknown` | Only retrieved sources are accepted |
+| `met/not_met` lacks literal patient evidence | Criterion becomes `unknown` | No conclusion from absence or paraphrase |
+
+Provider `503` capacity recovery remains explicit in the activity stream. The
+orchestrator may run the same bounded tools directly, but it never silently
+switches a live job to fixture results.
 
 ## API examples
 
@@ -147,3 +205,17 @@ Report retrieval and criteria quality independently:
 
 Compare the local embedding model with BM25 and stronger embedding alternatives
 on a labeled policy-query set before choosing a production design.
+
+## Automated coverage
+
+The deterministic test suite verifies:
+
+- only operative policy pages are chunked;
+- reference pages are excluded;
+- FAISS search returns page-cited passages;
+- insufficient patient evidence produces only `unknown` criteria;
+- the fixture API persists OCR, NER, grounding, and clinician correction data.
+
+Live Gemini evaluation is deliberately separate from CI because it is
+nondeterministic, network-dependent, quota-bearing, and unsuitable as the sole
+regression signal.
