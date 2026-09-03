@@ -469,8 +469,6 @@ tunes what the system is allowed to conclude.
 
 ## 7. How the no-denial guarantee is mechanical
 
-*(Presentation question 6, the one the whole design is organized around.)*
-
 Five independent layers, none of which is a prompt instruction:
 
 1. **The type cannot express it.** `Outcome` has two members. There is no denial
