@@ -15,33 +15,37 @@ from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from PIL import Image, UnidentifiedImageError
+from pypdf import PdfReader
 
 from app.config import get_settings
-from app.models import CorrectionRequest, GuidelineSearchRequest
-from app.orchestrator import PriorAuthOrchestrator
+from app.models import (
+    ClauseSearchRequest,
+    CorrectionRequest,
+    ReviewerDecisionRequest,
+)
+from app.pipeline import PriorAuthPipeline
 from app.repository import ReviewRepository
-from app.tools import get_guideline_knowledge_base
+from app.tools import get_registry
 
 
 settings = get_settings()
 repository = ReviewRepository(settings.resolved_app_db_path)
 repository.initialize()
-orchestrator = PriorAuthOrchestrator(repository, settings)
-knowledge_base = get_guideline_knowledge_base()
+pipeline = PriorAuthPipeline(repository, settings)
+registry = get_registry()
 background_tasks: set[asyncio.Task[None]] = set()
 logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    # Sentence-transformers can stall when its first PyTorch initialization
-    # happens in a worker thread on Windows. Prewarm once on the startup thread;
-    # subsequent retrieval stays local and fast.
-    try:
-        knowledge_base.prewarm()
-    except Exception as exc:
-        logger.warning("Guideline runtime prewarm failed: %s", type(exc).__name__)
+    logger.info(
+        "Loaded %d policy file(s) from %s",
+        len(registry.policies),
+        settings.policies_dir_path,
+    )
     yield
+
 
 app = FastAPI(
     title="Prior Authorization Intake Copilot",
@@ -67,14 +71,13 @@ async def health() -> dict[str, str]:
 async def public_config() -> dict[str, object]:
     return {
         "provider_mode": settings.provider_mode,
-        "adk_model": settings.adk_model,
-        "extraction_model": settings.extraction_model,
+        "llm_model": settings.llm_model,
         "max_upload_mb": settings.max_upload_mb,
-        "accepted_types": ["PNG", "JPEG", "WebP"],
-        "knowledge_base": knowledge_base.status(),
+        "accepted_types": ["PNG", "JPEG", "WebP", "PDF"],
+        "knowledge_base": registry.status(),
         "fixture_notice": (
-            "Fixture mode is for offline rehearsal only. Add GOOGLE_API_KEY for "
-            "live Gemini OCR, NER, and ADK orchestration."
+            "Fixture mode is for offline rehearsal only. Set ANTHROPIC_API_KEY "
+            "for live OCR, extraction, and criterion evidence."
             if settings.provider_mode == "fixture"
             else None
         ),
@@ -83,19 +86,25 @@ async def public_config() -> dict[str, object]:
 
 @app.get("/api/knowledge/status")
 async def knowledge_status() -> dict[str, object]:
-    return knowledge_base.status()
+    return registry.status()
 
 
 @app.post("/api/knowledge/search")
-async def search_knowledge(
-    request: GuidelineSearchRequest,
-) -> dict[str, object]:
-    passages = await asyncio.to_thread(
-        knowledge_base.search, request.query, request.top_k
-    )
+async def search_clauses(request: ClauseSearchRequest) -> dict[str, object]:
+    """Lexical clause lookup. Returns clauses, not pages."""
+
+    clauses = registry.search(request.query, request.top_k or 5)
     return {
         "query": request.query,
-        "passages": [passage.model_dump(mode="json") for passage in passages],
+        "clauses": [
+            {
+                "criterion_id": clause.id,
+                "page": clause.page,
+                "text": clause.text,
+                "predicate_type": clause.predicate.type,
+            }
+            for clause in clauses
+        ],
         "human_review_required": True,
     }
 
@@ -118,14 +127,14 @@ async def create_job(
         for index, upload in enumerate(files, start=1):
             safe_name = Path(upload.filename or f"document-{index}").name
             suffix = Path(safe_name).suffix.lower()
-            if suffix not in {".png", ".jpg", ".jpeg", ".webp"}:
+            if suffix not in {".png", ".jpg", ".jpeg", ".webp", ".pdf"}:
                 raise HTTPException(
                     status_code=415,
                     detail=f"Unsupported file type for {safe_name}",
                 )
             destination = job_dir / f"{index:02d}-{safe_name}"
             size = await _save_upload(upload, destination)
-            _verify_image(destination)
+            _verify_upload(destination)
             document_id = f"document-{index}"
             saved_paths.append(destination)
             saved_files.append(
@@ -155,7 +164,7 @@ async def create_job(
             "message": f"Received {len(saved_files)} document(s).",
         },
     )
-    task = asyncio.create_task(orchestrator.run_job(job_id, saved_paths))
+    task = asyncio.create_task(pipeline.run_job(job_id, saved_paths))
     background_tasks.add(task)
     task.add_done_callback(background_tasks.discard)
     return {
@@ -254,6 +263,31 @@ async def add_correction(
     return updated
 
 
+@app.post("/api/jobs/{job_id}/decision")
+async def add_reviewer_decision(
+    job_id: str, decision: ReviewerDecisionRequest
+) -> dict[str, object]:
+    """Record a reviewer's agreement, override, or final outcome."""
+
+    try:
+        updated = repository.add_reviewer_decision(job_id, decision)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    repository.append_event(
+        job_id,
+        "reviewer_action",
+        "decision",
+        {
+            "criterion_id": decision.criterion_id,
+            "reviewer_status": decision.reviewer_status,
+            "final_outcome": decision.final_outcome,
+            "reviewer": decision.reviewer,
+            "message": "Reviewer decision recorded.",
+        },
+    )
+    return updated
+
+
 async def _save_upload(upload: UploadFile, destination: Path) -> int:
     max_bytes = settings.max_upload_mb * 1024 * 1024
     size = 0
@@ -269,6 +303,30 @@ async def _save_upload(upload: UploadFile, destination: Path) -> int:
     if size == 0:
         raise HTTPException(status_code=400, detail=f"{upload.filename} is empty")
     return size
+
+
+def _verify_upload(path: Path) -> None:
+    if path.suffix.lower() == ".pdf":
+        _verify_pdf(path)
+    else:
+        _verify_image(path)
+
+
+def _verify_pdf(path: Path) -> None:
+    try:
+        reader = PdfReader(path)
+        if not reader.pages:
+            raise HTTPException(status_code=415, detail=f"Empty PDF: {path.name}")
+        if len(reader.pages) > 40:
+            raise HTTPException(
+                status_code=413, detail=f"{path.name} exceeds 40 pages"
+            )
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(
+            status_code=415, detail=f"Invalid PDF: {path.name}"
+        ) from exc
 
 
 def _verify_image(path: Path) -> None:

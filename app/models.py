@@ -117,51 +117,25 @@ class ExtractionResult(BaseModel):
     provider: str
 
 
-class RetrievedGuidelinePassage(BaseModel):
-    chunk_id: str
-    document_title: str
-    policy_number: str
-    page: int = Field(ge=1)
-    section: str
-    text: str
-    score: float = Field(ge=-1, le=1)
-    citation: str
+class CriterionEvidence(BaseModel):
+    """Patient evidence bearing on one criterion.
 
+    Deliberately has no met/not_met field: the model reports what the chart says,
+    and `app.adjudication` decides what that means.
+    """
 
-class CriterionAssessment(BaseModel):
     criterion_id: str
-    criterion: str
-    status: CriterionStatus
-    patient_evidence: list[str] = Field(default_factory=list)
-    guideline_citations: list[str] = Field(default_factory=list)
-    rationale: str
-    confidence: float = Field(ge=0, le=1)
+    found: bool
+    value: str | None = None
+    value_date: str | None = None
+    evidence_text: str = ""
+    document_id: str = ""
+    page: int | None = None
 
 
-class CriteriaMatrixPayload(BaseModel):
-    criteria: list[CriterionAssessment]
-    summary: str
-    warnings: list[str] = Field(default_factory=list)
-
-
-class GuidelineGroundingResult(BaseModel):
-    query: str
-    passages: list[RetrievedGuidelinePassage]
-    criteria: list[CriterionAssessment]
-    overall_status: Literal["requires_human_review"] = "requires_human_review"
-    summary: str
-    knowledge_base: str
-    policy_number: str
-    effective_date: str
-    index_version: str
-    embedding_model: str
-    assessment_model: str | None = None
-    warnings: list[str] = Field(default_factory=list)
-
-
-class GuidelineSearchRequest(BaseModel):
+class ClauseSearchRequest(BaseModel):
     query: str = Field(min_length=3, max_length=2000)
-    top_k: int | None = Field(default=None, ge=1, le=12)
+    top_k: int | None = Field(default=None, ge=1, le=20)
 
 
 class CorrectionRequest(BaseModel):
@@ -169,6 +143,23 @@ class CorrectionRequest(BaseModel):
     corrected_value: str
     reviewer: str = Field(default="Clinical reviewer", min_length=1, max_length=120)
     verified: bool = True
+
+
+class ReviewerDecisionRequest(BaseModel):
+    """A clinician's conclusion, per criterion or for the whole request.
+
+    `final_outcome` is free text because a licensed reviewer may record a denial.
+    The system's own `Outcome` type has no such member; a non-affirmation can only
+    enter the record through this endpoint, attributed to a person.
+    """
+
+    criterion_id: str | None = None
+    system_status: str | None = None
+    reviewer_status: Literal["met", "not_met", "unknown"] | None = None
+    final_outcome: str | None = Field(default=None, max_length=120)
+    reason_code: str | None = Field(default=None, max_length=120)
+    note: str | None = Field(default=None, max_length=2000)
+    reviewer: str = Field(default="Clinical reviewer", min_length=1, max_length=120)
 
 
 class JobEvent(BaseModel):

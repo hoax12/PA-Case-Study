@@ -45,14 +45,15 @@
             <div class="eyebrow">PRIOR AUTHORIZATION · INTAKE</div>
             <h1>Turn patient documents into<br /><span>reviewable evidence.</span></h1>
             <p>
-              Watch the orchestration agent transcribe images, extract structured
-              clinical entities, retrieve bariatric policy evidence, and preserve
-              uncertainty for human verification.
+              The model transcribes, extracts, and locates evidence. Routing,
+              criterion evaluation, and the outcome are computed in code that has
+              no denial to return: every request is either provisionally affirmed
+              or referred to a clinician, with the blocking clauses named.
             </p>
           </div>
           <div class="hero-stat">
-            <div class="stat-orbit"><span>3</span></div>
-            <div><strong>Bounded tools</strong><small>OCR → NER → Guideline RAG</small></div>
+            <div class="stat-orbit"><span>2</span></div>
+            <div><strong>Possible outcomes</strong><small>Affirm · Refer to human</small></div>
           </div>
         </section>
 
@@ -98,8 +99,8 @@
               <div class="progress-step" data-stage="upload"><i>1</i><b>Upload</b><small>Documents received</small></div>
               <div class="progress-step" data-stage="ocr"><i>2</i><b>OCR</b><small>Transcribe images</small></div>
               <div class="progress-step" data-stage="ner"><i>3</i><b>Clinical NER</b><small>Extract entities</small></div>
-              <div class="progress-step" data-stage="grounding"><i>4</i><b>Guideline RAG</b><small>Retrieve cited criteria</small></div>
-              <div class="progress-step" data-stage="review"><i>5</i><b>Human review</b><small>Verify uncertainty</small></div>
+              <div class="progress-step" data-stage="adjudication"><i>4</i><b>Adjudicate</b><small>Route, evaluate, decide</small></div>
+              <div class="progress-step" data-stage="review"><i>5</i><b>Human review</b><small>Agree or override</small></div>
             </div>
           </div>
 
@@ -107,7 +108,7 @@
             <div class="metric"><span>Documents</span><strong id="metricDocs">—</strong><small>processed</small></div>
             <div class="metric"><span>Entities</span><strong id="metricEntities">—</strong><small>extracted</small></div>
             <div class="metric"><span>Avg. confidence</span><strong id="metricConfidence">—</strong><small>prototype signal</small></div>
-            <div class="metric"><span>Policy criteria</span><strong id="metricCriteria">—</strong><small>preliminary matrix</small></div>
+            <div class="metric"><span>Criteria met</span><strong id="metricCriteria">—</strong><small>of the governing set</small></div>
             <div class="metric alert"><span>Needs review</span><strong id="metricReview">—</strong><small>low / medium confidence</small></div>
           </div>
 
@@ -142,35 +143,80 @@
             </article>
           </div>
 
-          <article id="groundingPanel" class="panel grounding-panel hidden">
+          <article id="adjudicationPanel" class="panel grounding-panel hidden">
+            <div id="outcomeBanner" class="outcome-banner">
+              <div class="outcome-mark" aria-hidden="true"></div>
+              <div class="outcome-copy">
+                <span id="outcomeLabel">—</span>
+                <p id="outcomeRationale"></p>
+              </div>
+              <div class="outcome-side">
+                <b id="outcomeConfidence">—</b>
+                <small id="outcomeThreshold"></small>
+              </div>
+            </div>
+
             <div class="panel-head grounding-head">
               <div>
-                <span class="step-label">GROUNDED POLICY REVIEW</span>
-                <h2>Preliminary bariatric criteria matrix</h2>
+                <span class="step-label">CRITERIA MATRIX</span>
+                <h2>Every governing clause, with its evidence</h2>
               </div>
               <div class="policy-meta">
                 <span id="policyNumber">Policy —</span>
                 <span id="policyEffective">Effective —</span>
+                <span id="policyPathway">Pathway —</span>
               </div>
             </div>
             <div class="grounding-disclaimer">
-              Decision support only. This prototype retrieves policy evidence and surfaces
-              missing facts; it does not approve, deny, or determine medical necessity.
+              This system cannot deny. An affirmation is provisional and reversible;
+              anything else is referred to a licensed reviewer, who owns the final
+              outcome. Confidence is an uncalibrated legibility signal, not a
+              probability of correctness.
             </div>
-            <p id="groundingSummary" class="grounding-summary"></p>
-            <div id="groundingWarnings" class="grounding-warnings hidden"></div>
+            <div id="referReasons" class="grounding-warnings hidden"></div>
             <div class="criteria-table-scroll">
-              <table class="criteria-table">
+              <table class="criteria-table adjudication-table">
                 <thead>
-                  <tr><th>Criterion</th><th>Status</th><th>Patient evidence</th><th>Policy citation</th><th>Reasoning</th></tr>
+                  <tr><th>Clause</th><th>Status</th><th>Patient evidence</th><th>Policy citation</th><th>Why</th><th>Reviewer</th></tr>
                 </thead>
                 <tbody id="criteriaRows"></tbody>
               </table>
             </div>
-            <details class="passage-details">
-              <summary>View retrieved policy passages <span id="passageCount"></span></summary>
-              <div id="retrievedPassages" class="retrieved-passages"></div>
-            </details>
+
+            <form id="decisionForm" class="decision-form">
+              <div class="decision-head">
+                <span class="step-label">FINAL REVIEWER DECISION</span>
+                <p>
+                  The system's outcome above is a recommendation. What you record here
+                  is the decision of record, stored against your name — including a
+                  denial, which only a person can enter.
+                </p>
+              </div>
+              <div class="decision-fields">
+                <label>Outcome
+                  <select id="finalOutcome" required>
+                    <option value="">Select…</option>
+                    <option value="approved">Approved</option>
+                    <option value="denied">Denied</option>
+                    <option value="pended_for_information">Pended for more information</option>
+                    <option value="peer_to_peer">Referred to peer-to-peer</option>
+                  </select>
+                </label>
+                <label>Reason code
+                  <input id="reasonCode" maxlength="120" placeholder="e.g. MGB-008.TORe.5" />
+                </label>
+                <label>Reviewer
+                  <input id="reviewerName" maxlength="120" value="Clinical reviewer" required />
+                </label>
+              </div>
+              <label class="decision-note">Note
+                <textarea id="decisionNote" rows="2" maxlength="2000" placeholder="What you checked, and anything the system missed."></textarea>
+              </label>
+              <div class="decision-actions">
+                <span id="decisionLog" class="decision-log"></span>
+                <button class="primary-button" type="submit"><span>Record decision</span></button>
+              </div>
+            </form>
           </article>
 
           <article class="panel activity-panel">
@@ -186,5 +232,6 @@
 
     <div id="toast" class="toast" role="status"></div>
     <script src="/static/app.js" defer></script>
+    <script src="/static/review.js" defer></script>
   </body>
 </html>

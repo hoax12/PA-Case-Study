@@ -1,0 +1,464 @@
+# Mass General Brigham Health Plan - Bariatric Surgery, Policy 008.
+#
+# Every `text` below is copied verbatim from the source PDF and is verified against
+# it by tests/test_registry.py, so a citation cannot drift from what the policy says.
+# Predicates are authored by hand from that text; scripts/extract_policy_draft.py
+# drafts this file for a new payer, but a human approves it before it is used.
+
+policy_id: MGB-008
+title: Mass General Brigham Health Plan - Bariatric Surgery
+payer: Mass General Brigham Health Plan
+effective_date: "2026-07-01"
+source_file: BariatricSurgery.pdf
+source_sha256: null
+
+pathways:
+  - id: commercial
+    page: 2
+    lines_of_business:
+      - commercial
+      - qualified health plan
+      - qhp
+    pa_required: true
+    procedures:
+      - id: TORe
+        cpt: ["C9785"]
+        aliases:
+          - transoral outlet reduction
+          - transoral outlet reduction (TORe)
+          - tore revision
+        criteria_ref: TORe
+      - id: SADI-S-revisional
+        cpt: ["43659"]
+        aliases:
+          - sadi-s
+          - single anastomosis duodenal-ileal bypass
+          - sadi-s revisional
+        criteria_ref: SADI-S-revisional
+      - id: SADI-S-second-stage
+        aliases:
+          - sadi-s second stage
+          - sadi-s as the second stage
+        criteria_ref: SADI-S-second-stage
+      - id: RYGB
+        aliases:
+          - roux-en-y gastric bypass
+          - gastric bypass
+        criteria_ref: "external:InterQual (adults 18 and older)"
+      - id: sleeve-gastrectomy
+        aliases:
+          - sleeve gastrectomy
+        criteria_ref: "external:InterQual (adults 18 and older)"
+      - id: LAGB
+        aliases:
+          - laparoscopic adjustable gastric banding
+          - adjustable gastric banding
+        criteria_ref: "external:InterQual (adults 18 and older)"
+      - id: BPD-DS
+        aliases:
+          - biliopancreatic diversion with duodenal switch
+        criteria_ref: "external:InterQual (adults 18 and older)"
+
+  - id: medicare-advantage
+    page: 1
+    lines_of_business:
+      - medicare advantage
+      - medicare
+    pa_required: true
+    not_covered_cpt: ["S2083"]
+    procedures:
+      - id: any-bariatric-surgery
+        catch_all: true
+        cpt: ["C9785", "43659", "43845", "S2083"]
+        aliases:
+          - bariatric surgery
+        criteria_ref: "external:CMS NCD 100.1 and LCD L35022"
+
+  - id: mgb-aco
+    page: 2
+    lines_of_business:
+      - mass general brigham aco
+      - aco
+      - masshealth
+    pa_required: true
+    not_covered_cpt: ["43845", "C9785"]
+    procedures:
+      - id: any-bariatric-surgery
+        catch_all: true
+        cpt: ["C9785", "43659", "43845", "S2083"]
+        aliases:
+          - bariatric surgery
+        criteria_ref: "external:MassHealth Guidelines for Medical Necessity Determination for Bariatric Surgery"
+
+  - id: one-care-sco
+    page: 2
+    lines_of_business:
+      - one care
+      - senior care options
+      - sco
+    pa_required: true
+    procedures:
+      - id: any-bariatric-surgery
+        catch_all: true
+        cpt: ["C9785", "43659", "43845", "S2083"]
+        aliases:
+          - bariatric surgery
+        criteria_ref: "external:CMS NCD 100.1, then MassHealth criteria"
+
+  - id: adolescent
+    page: 5
+    lines_of_business:
+      - adolescent
+    pa_required: true
+    procedures:
+      - id: any-bariatric-surgery
+        catch_all: true
+        cpt: ["C9785", "43659", "43845", "S2083"]
+        aliases:
+          - bariatric surgery
+        criteria_ref: "external:InterQual (adolescents 13 through 17)"
+
+criteria_sets:
+
+  TORe:
+    logic: all
+    items:
+      - id: MGB-008.TORe.1
+        page: 4
+        text: "The member is at least 18 years of age"
+        predicate: {type: threshold, field: age, op: ">=", value: 18}
+
+      - id: MGB-008.TORe.2
+        page: 4
+        text: "The member is requesting a revisional bariatric procedure"
+        predicate: {type: boolean, field: requesting_revisional_procedure}
+
+      - id: MGB-008.TORe.3
+        page: 4
+        text: "The member failed primary surgery due to one of the following: a. The member was unable to achieve at least 50% excess body weight loss; or b. The member was unable to maintain at least 50% excess body weight loss"
+        predicate: {type: boolean, field: failed_primary_ewl_50}
+
+      - id: MGB-008.TORe.4
+        page: 4
+        text: "The member's BMI is one of the following: a. At least 35 kg/m2; or b. At least 32.5 kg/m2, and the member is of Asian descent"
+        predicate:
+          type: threshold
+          field: bmi
+          op: ">="
+          value: 35
+          unknown_band: [32.5, 35]
+        note: >-
+          The 32.5 branch turns on the member being of Asian descent. The system
+          never infers a protected characteristic, so a BMI in [32.5, 35) is
+          UNKNOWN and goes to a reviewer rather than being scored against the
+          higher threshold.
+
+      - id: MGB-008.TORe.5
+        page: 4
+        text: "The primary surgery was performed at least one year ago"
+        predicate:
+          type: temporal
+          anchor: primary_surgery_date
+          op: ">="
+          duration: P1Y
+          relative_to: order_date
+
+      - id: MGB-008.TORe.6
+        page: 4
+        text: "The member has been adherent with diet and physical activity since the primary surgery, and this adherence has been documented"
+        predicate: {type: boolean, field: diet_activity_adherence_documented}
+
+      - id: MGB-008.TORe.7
+        page: 5
+        text: "The member does not have a substance use disorder or has been in recovery for at least one year"
+        predicate: {type: boolean, field: substance_use_cleared}
+
+      - id: MGB-008.TORe.8
+        page: 5
+        text: "The member does not have a psychiatric disorder or their psychiatric disorder is well-managed and under control"
+        predicate: {type: boolean, field: psychiatric_cleared}
+
+      - id: MGB-008.TORe.9
+        page: 5
+        text: "The member completed a psychosocial evaluation and was cleared for surgery by a behavioral health provider"
+        predicate: {type: boolean, field: psychosocial_evaluation_cleared}
+
+      - id: MGB-008.TORe.10
+        page: 5
+        text: "The member has never used tobacco use or has not used tobacco for at least 6 weeks prior to the surgery"
+        predicate:
+          type: temporal
+          anchor: last_tobacco_use_date
+          op: ">="
+          duration: P6W
+          relative_to: planned_surgery_date
+          none_ok: true
+        note: >-
+          The lookback is anchored to the planned surgery date, not the order date.
+          A member who has never used tobacco satisfies it with no date at all.
+
+      - id: MGB-008.TORe.11
+        page: 5
+        text: "The member completed a dietary consultation"
+        predicate: {type: boolean, field: dietary_consultation_completed}
+
+      - id: MGB-008.TORe.12
+        page: 5
+        text: "The member understands the surgical procedure and post procedure compliance"
+        predicate: {type: attestation, field: understands_procedure}
+
+      - id: MGB-008.TORe.13
+        page: 5
+        text: "The member has a follow-up planned with their health care team"
+        predicate: {type: boolean, field: followup_planned}
+
+      - id: MGB-008.TORe.14
+        page: 5
+        text: "The member is not pregnant and does not plan to become pregnant for at least 18 months after the surgery"
+        predicate: {type: attestation, field: pregnancy_attestation}
+        note: >-
+          Pregnancy status is never inferred from the chart. This requires an
+          explicit attestation in the packet or it stays UNKNOWN.
+
+      - id: MGB-008.TORe.15
+        page: 5
+        text: "The procedure will be performed at bariatric surgery center"
+        predicate: {type: boolean, field: bariatric_surgery_center}
+
+      - id: MGB-008.TORe.16
+        page: 5
+        text: "The member's primary bariatric procedure was RYGB"
+        predicate: {type: enum, field: primary_procedure, allowed: ["RYGB"]}
+
+  SADI-S-revisional:
+    logic: all
+    items:
+      - id: MGB-008.SADIS-REV.1
+        page: 3
+        text: "The member is requesting revisional bariatric surgery due to one of the following: a. The member failed primary surgery due to one of the following: i. The member was unable to achieve >= 50% excess body weight loss; or ii. The member was unable to maintain >= 50% excess body weight loss; or b. The member is experiencing a perioperative or late surgery complication"
+        predicate: {type: boolean, field: revision_indication_present}
+
+      - id: MGB-008.SADIS-REV.2
+        page: 3
+        text: "The member's body measurement index (BMI) meets one of the following: a. At least 35 kg/m2; or b. At least 32.5 kg/m2 and the member is of Asian descent"
+        predicate:
+          type: threshold
+          field: bmi
+          op: ">="
+          value: 35
+          unknown_band: [32.5, 35]
+
+      - id: MGB-008.SADIS-REV.3
+        page: 3
+        text: "The primary surgery was at least 1 year ago"
+        predicate:
+          type: temporal
+          anchor: primary_surgery_date
+          op: ">="
+          duration: P1Y
+          relative_to: order_date
+
+      - id: MGB-008.SADIS-REV.4
+        page: 3
+        text: "The member has been compliant with diet and physical activity, and such compliance is documented"
+        predicate: {type: boolean, field: diet_activity_adherence_documented}
+
+      - id: MGB-008.SADIS-REV.5
+        page: 3
+        text: "The member does not have a substance use disorder or has been in recovery for at least one year"
+        predicate: {type: boolean, field: substance_use_cleared}
+
+      - id: MGB-008.SADIS-REV.6
+        page: 3
+        text: "The member does not have a psychiatric disorder or their psychiatric disorder is well-managed and under control"
+        predicate: {type: boolean, field: psychiatric_cleared}
+
+      - id: MGB-008.SADIS-REV.7
+        page: 3
+        text: "The member has completed a psychosocial evaluation and been cleared for surgery by a behavioral health provider"
+        predicate: {type: boolean, field: psychosocial_evaluation_cleared}
+
+      - id: MGB-008.SADIS-REV.8
+        page: 3
+        text: "The member does not use tobacco or has not used tobacco for at least 6 weeks prior to surgery"
+        predicate:
+          type: temporal
+          anchor: last_tobacco_use_date
+          op: ">="
+          duration: P6W
+          relative_to: planned_surgery_date
+          none_ok: true
+
+      - id: MGB-008.SADIS-REV.9
+        page: 3
+        text: "The member has had a dietary consultation"
+        predicate: {type: boolean, field: dietary_consultation_completed}
+
+      - id: MGB-008.SADIS-REV.10
+        page: 3
+        text: "The member understands the surgical procedure and post procedure compliance"
+        predicate: {type: attestation, field: understands_procedure}
+
+      - id: MGB-008.SADIS-REV.11
+        page: 3
+        text: "The member has a follow-up planned with their health care team"
+        predicate: {type: boolean, field: followup_planned}
+
+      - id: MGB-008.SADIS-REV.12
+        page: 3
+        text: "The member is not pregnant and does not plan to become pregnant for at least 18 months after surgery"
+        predicate: {type: attestation, field: pregnancy_attestation}
+
+      - id: MGB-008.SADIS-REV.13
+        page: 3
+        text: "The procedure will be performed at bariatric surgery center"
+        predicate: {type: boolean, field: bariatric_surgery_center}
+
+      - id: MGB-008.SADIS-REV.14
+        page: 4
+        text: "a. RYGB; or b. Sleeve Gastrectomy."
+        predicate:
+          type: enum
+          field: primary_procedure
+          allowed: ["RYGB", "Sleeve Gastrectomy"]
+        note: >-
+          Clause 14 on page 3 reads "The member's primary bariatric procedure was
+          one of the following:" and its list continues onto page 4. The citation
+          points at the list because that is where the enumerated values are.
+
+  SADI-S-second-stage:
+    logic: all
+    items:
+      - id: MGB-008.SADIS-2ND.1
+        page: 4
+        text: "The member is at least 18 years of age"
+        predicate: {type: threshold, field: age, op: ">=", value: 18}
+
+      - id: MGB-008.SADIS-2ND.2
+        page: 4
+        text: "The member has a BMI of at least 40 kg/m2"
+        predicate: {type: threshold, field: bmi, op: ">=", value: 40}
+
+      - id: MGB-008.SADIS-2ND.3
+        page: 4
+        text: "The first stage procedure was a sleeve gastrectomy, and it was completed at least 6 months ago"
+        predicate:
+          type: temporal
+          anchor: first_stage_surgery_date
+          op: ">="
+          duration: P6M
+          relative_to: order_date
+
+      - id: MGB-008.SADIS-2ND.4
+        page: 4
+        text: "The member has been unable to achieve or maintain weight loss"
+        predicate: {type: boolean, field: unable_to_achieve_weight_loss}
+
+      - id: MGB-008.SADIS-2ND.5
+        page: 4
+        text: "The member has no significant gastrointestinal symptoms or the member has been evaluated and their symptoms have been cleared"
+        predicate: {type: boolean, field: gi_symptoms_cleared}
+
+      - id: MGB-008.SADIS-2ND.6
+        page: 4
+        text: "The member does not have a substance use disorder or has been in recover for at least one year"
+        predicate: {type: boolean, field: substance_use_cleared}
+
+      - id: MGB-008.SADIS-2ND.7
+        page: 4
+        text: "The member does not have a psychiatric disorder or their psychiatric disorder is well-managed and under control"
+        predicate: {type: boolean, field: psychiatric_cleared}
+
+      - id: MGB-008.SADIS-2ND.8
+        page: 4
+        text: "The member has completed a psychosocial evaluation and been cleared for surgery by a behavioral health provider"
+        predicate: {type: boolean, field: psychosocial_evaluation_cleared}
+
+      - id: MGB-008.SADIS-2ND.9
+        page: 4
+        text: "The member does not use tobacco use or has not used tobacco for at least 6 weeks prior to surgery"
+        predicate:
+          type: temporal
+          anchor: last_tobacco_use_date
+          op: ">="
+          duration: P6W
+          relative_to: planned_surgery_date
+          none_ok: true
+
+      - id: MGB-008.SADIS-2ND.10
+        page: 4
+        text: "The member completed a dietary consultation"
+        predicate: {type: boolean, field: dietary_consultation_completed}
+
+      - id: MGB-008.SADIS-2ND.11
+        page: 4
+        text: "The member understands the surgical procedure and post procedure compliance"
+        predicate: {type: attestation, field: understands_procedure}
+
+      - id: MGB-008.SADIS-2ND.12
+        page: 4
+        text: "The member has a follow-up planned with their health care team"
+        predicate: {type: boolean, field: followup_planned}
+
+      - id: MGB-008.SADIS-2ND.13
+        page: 4
+        text: "The member is not pregnant and does not plan to become pregnant for at least 18 mos after surgery"
+        predicate: {type: attestation, field: pregnancy_attestation}
+
+      - id: MGB-008.SADIS-2ND.14
+        page: 4
+        text: "The procedure will be performed at bariatric surgery center."
+        predicate: {type: boolean, field: bariatric_surgery_center}
+
+exclusions:
+  - id: MGB-008.EXCL.1
+    page: 5
+    text: "Primary endoscopic bariatric surgery procedures including but not limited to the following: a. Natural orifice transluminal endoscopic surgery (NOTES); b. Transoral gastroplasty; c. Endoluminal vertical gastroplasty; d. Endoscopic sleeve gastroplasty; e. Use of endoscopic closure devices"
+    procedures:
+      - NOTES
+      - natural orifice transluminal endoscopic surgery
+      - transoral gastroplasty
+      - endoluminal vertical gastroplasty
+      - endoscopic sleeve gastroplasty
+  - id: MGB-008.EXCL.2
+    page: 5
+    text: "Gastric balloon"
+    procedures:
+      - gastric balloon
+  - id: MGB-008.EXCL.3
+    page: 5
+    text: "Long limb gastric bypass."
+    procedures:
+      - long limb gastric bypass
+
+cross_references:
+  - from: one-care-sco
+    text: "See Medicare Advantage criteria and exclusions above. If Medicare Advantage criteria are not met, then MassHealth criteria are applied."
+    to: [medicare-advantage, mgb-aco]
+  - from: commercial
+    text: "Medical necessity for bariatric surgery for adults 18 years of age and older is determined through InterQual criteria, with the exception of revisional procedures single anastomosis duodenal-ileal bypass (SADI-S) and transoral outlet reduction (TORe), for which criteria can be found below."
+    to: [commercial]
+
+# Retrieval questions, keyed by predicate field.
+#
+# The clause `text` above is the citation shown to the reviewer and must stay
+# verbatim. It is often a poor instruction to a retrieval model: a clause phrased
+# as an absence ("does not have a substance use disorder") gets answered about the
+# fact rather than the clause, so "no substance use documented" comes back as "no"
+# and reads as a failure. These questions fix the polarity and the answer shape.
+# They ask what the documentation states; they never ask for a judgement.
+evidence_questions:
+  requesting_revisional_procedure: "Do the documents state that the requested procedure is a revisional (not primary) bariatric procedure? Answer yes or no."
+  failed_primary_ewl_50: "Do the documents state that the member failed the primary surgery by being unable to achieve or to maintain at least 50% excess body weight loss? Answer yes or no."
+  revision_indication_present: "Do the documents state that the member failed the primary surgery on excess body weight loss, or had a perioperative or late surgical complication? Answer yes or no."
+  diet_activity_adherence_documented: "Do the documents record that the member has been adherent with diet and physical activity since the primary surgery? Answer yes or no."
+  substance_use_cleared: "Do the documents state either that the member has no substance use disorder, or that the member has been in recovery for at least one year? Answer yes if either is stated, no if an active untreated substance use disorder is documented."
+  psychiatric_cleared: "Do the documents state either that the member has no psychiatric disorder, or that a psychiatric disorder is well-managed and under control? Answer yes if either is stated, no if an uncontrolled psychiatric disorder is documented."
+  psychosocial_evaluation_cleared: "Do the documents record a completed psychosocial or behavioral health evaluation that cleared the member for surgery? Answer yes or no."
+  dietary_consultation_completed: "Do the documents record a completed dietary or nutritional consultation? Answer yes or no."
+  understands_procedure: "Do the documents contain an attestation that the member understands the surgical procedure and the post-procedure compliance required? Answer yes or no."
+  followup_planned: "Do the documents record a planned follow-up with the member's health care team? Answer yes or no."
+  pregnancy_attestation: "Do the documents contain an attestation that the member is not pregnant and does not plan to become pregnant for at least 18 months after surgery? Answer yes or no."
+  bariatric_surgery_center: "Do the documents name the facility performing the procedure as a bariatric surgery center? Answer yes or no."
+  unable_to_achieve_weight_loss: "Do the documents state that the member has been unable to achieve or maintain weight loss? Answer yes or no."
+  gi_symptoms_cleared: "Do the documents state either that the member has no significant gastrointestinal symptoms, or that such symptoms were evaluated and cleared? Answer yes or no."

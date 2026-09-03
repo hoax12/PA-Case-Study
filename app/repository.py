@@ -11,8 +11,8 @@ from typing import Any
 from app.models import (
     CorrectionRequest,
     ExtractionResult,
-    GuidelineGroundingResult,
     OcrBatchResult,
+    ReviewerDecisionRequest,
 )
 
 
@@ -21,7 +21,7 @@ def utc_now() -> str:
 
 
 class ReviewRepository:
-    """Persists application state independently of ADK's session tables."""
+    """Jobs, events, corrections, and reviewer decisions."""
 
     def __init__(self, db_path: Path):
         self.db_path = db_path
@@ -46,7 +46,7 @@ class ReviewRepository:
                     files_json TEXT NOT NULL,
                     ocr_json TEXT,
                     extraction_json TEXT,
-                    grounding_json TEXT,
+                    adjudication_json TEXT,
                     error TEXT,
                     created_at TEXT NOT NULL,
                     updated_at TEXT NOT NULL
@@ -76,12 +76,33 @@ class ReviewRepository:
                 );
                 """
             )
+            connection.executescript(
+                """
+                CREATE TABLE IF NOT EXISTS reviewer_decisions (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    job_id TEXT NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,
+                    criterion_id TEXT,
+                    system_status TEXT,
+                    reviewer_status TEXT,
+                    final_outcome TEXT,
+                    reason_code TEXT,
+                    note TEXT,
+                    reviewer TEXT NOT NULL,
+                    created_at TEXT NOT NULL
+                );
+
+                CREATE INDEX IF NOT EXISTS idx_reviewer_decisions_job
+                ON reviewer_decisions(job_id, id);
+                """
+            )
             columns = {
                 row["name"]
                 for row in connection.execute("PRAGMA table_info(jobs)").fetchall()
             }
-            if "grounding_json" not in columns:
-                connection.execute("ALTER TABLE jobs ADD COLUMN grounding_json TEXT")
+            if "adjudication_json" not in columns:
+                connection.execute(
+                    "ALTER TABLE jobs ADD COLUMN adjudication_json TEXT"
+                )
 
     def create_job(
         self, job_id: str, provider_mode: str, files: list[dict[str, Any]]
@@ -106,7 +127,7 @@ class ReviewRepository:
             "session_id",
             "ocr_json",
             "extraction_json",
-            "grounding_json",
+            "adjudication_json",
             "error",
         }
         unexpected = set(values) - allowed
@@ -129,10 +150,42 @@ class ReviewRepository:
     def save_extraction(self, job_id: str, result: ExtractionResult) -> None:
         self.update_job(job_id, extraction_json=result.model_dump_json())
 
-    def save_grounding(
-        self, job_id: str, result: GuidelineGroundingResult
-    ) -> None:
-        self.update_job(job_id, grounding_json=result.model_dump_json())
+    def save_adjudication(self, job_id: str, result: object) -> None:
+        self.update_job(job_id, adjudication_json=result.model_dump_json())  # type: ignore[attr-defined]
+
+    def add_reviewer_decision(
+        self, job_id: str, decision: "ReviewerDecisionRequest"
+    ) -> dict[str, Any]:
+        """Record what the reviewer concluded.
+
+        `final_outcome` is free text written by a person and may be a denial. The
+        system's own Outcome type still has no such value; a denial exists in this
+        table only because a licensed reviewer put it there.
+        """
+
+        if self.get_job(job_id) is None:
+            raise KeyError("Job was not found")
+        with self.connect() as connection:
+            connection.execute(
+                """
+                INSERT INTO reviewer_decisions (
+                    job_id, criterion_id, system_status, reviewer_status,
+                    final_outcome, reason_code, note, reviewer, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    job_id,
+                    decision.criterion_id,
+                    decision.system_status,
+                    decision.reviewer_status,
+                    decision.final_outcome,
+                    decision.reason_code,
+                    decision.note,
+                    decision.reviewer,
+                    utc_now(),
+                ),
+            )
+        return self.get_job(job_id) or {}
 
     def append_event(
         self, job_id: str, event_type: str, stage: str, payload: dict[str, Any]
@@ -184,6 +237,14 @@ class ReviewRepository:
             ).fetchone()
             if row is None:
                 return None
+            decisions = connection.execute(
+                """
+                SELECT criterion_id, system_status, reviewer_status, final_outcome,
+                       reason_code, note, reviewer, created_at
+                FROM reviewer_decisions WHERE job_id = ? ORDER BY id ASC
+                """,
+                (job_id,),
+            ).fetchall()
             corrections = connection.execute(
                 """
                 SELECT entity_id, original_value, corrected_value, reviewer,
@@ -203,12 +264,13 @@ class ReviewRepository:
             if result["extraction_json"]
             else None
         )
-        result["grounding"] = (
-            json.loads(result.pop("grounding_json"))
-            if result["grounding_json"]
+        result["adjudication"] = (
+            json.loads(result.pop("adjudication_json"))
+            if result["adjudication_json"]
             else None
         )
         result["corrections"] = [dict(correction) for correction in corrections]
+        result["reviewer_decisions"] = [dict(decision) for decision in decisions]
         self._overlay_corrections(result)
         return result
 

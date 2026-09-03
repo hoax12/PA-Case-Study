@@ -48,6 +48,7 @@ function bindUploadControls() {
   $("#clearFilesButton").addEventListener("click", clearSelectedFiles);
   $("#analyzeButton").addEventListener("click", startAnalysis);
   $$('[data-reset-intake]').forEach((button) => button.addEventListener("click", resetIntake));
+  $("#decisionForm").addEventListener("submit", submitFinalDecision);
 }
 
 async function loadConfig() {
@@ -156,9 +157,10 @@ async function resumeJob(jobId) {
       updateProgress("ner", true);
       renderExtraction(state.job.extraction);
     }
-    if (state.job.grounding) {
-      updateProgress("grounding", true);
-      renderGrounding(state.job.grounding);
+    if (state.job.adjudication) {
+      updateProgress("adjudication", true);
+      renderAdjudication(state.job.adjudication);
+      renderDecisionLog();
     }
     // Replay persisted SSE events even for completed jobs so a saved demo URL
     // retains the same auditable tool trace as the original live run.
@@ -188,13 +190,12 @@ function resetWorkspace() {
   $("#entityGroups").innerHTML = '<div class="skeleton-list"><span></span><span></span><span></span><span></span></div>';
   $("#missingFields").classList.add("hidden");
   $("#reviewReasons").classList.add("hidden");
-  $("#groundingPanel").classList.add("hidden");
-  $("#groundingSummary").textContent = "";
-  $("#groundingWarnings").classList.add("hidden");
-  $("#groundingWarnings").innerHTML = "";
+  $("#adjudicationPanel").classList.add("hidden");
+  $("#referReasons").classList.add("hidden");
+  $("#referReasons").innerHTML = "";
   $("#criteriaRows").innerHTML = "";
-  $("#retrievedPassages").innerHTML = "";
-  $("#passageCount").textContent = "";
+  $("#decisionForm").reset();
+  $("#decisionLog").textContent = "";
   $$(".progress-step").forEach((element, index) => {
     element.classList.remove("active", "complete");
     element.querySelector("i").textContent = String(index + 1);
@@ -224,9 +225,10 @@ function resetIntake() {
 }
 
 function renderProviderBadge(mode) {
-  const normalized = mode === "gemini" ? "gemini" : "fixture";
+  const normalized = mode === "claude" ? "claude" : "fixture";
   const badge = $("#providerBadge");
-  badge.textContent = normalized === "gemini" ? "Gemini · ADK live" : "Fixture · rehearsal";
+  const model = state.config?.llm_model || "Claude";
+  badge.textContent = normalized === "claude" ? `${model} · live` : "Fixture · rehearsal";
   badge.className = `provider-badge ${normalized}`;
 }
 
@@ -265,7 +267,10 @@ async function refreshJob() {
   state.job = await response.json();
   if (state.job.ocr) renderOcr(state.job);
   if (state.job.extraction) renderExtraction(state.job.extraction);
-  if (state.job.grounding) renderGrounding(state.job.grounding);
+  if (state.job.adjudication) {
+    renderAdjudication(state.job.adjudication);
+    renderDecisionLog();
+  }
   if (state.job.status === "ready") setJobStatus("ready", "Ready for review");
   if (state.job.status === "error") {
     setJobStatus("error", "Needs attention");
@@ -274,7 +279,11 @@ async function refreshJob() {
 }
 
 function updateProgress(stage, completed) {
-  const order = ["upload", "ocr", "ner", "grounding", "review"];
+  // Routing, evidence retrieval, and the decision are three pipeline stages but
+  // one step on the reviewer's progress bar.
+  const merged = { intake: "upload", routing: "adjudication", evidence: "adjudication", decision: "adjudication" };
+  stage = merged[stage] || stage;
+  const order = ["upload", "ocr", "ner", "adjudication", "review"];
   const index = order.indexOf(stage);
   if (index < 0) return;
   const element = $(`.progress-step[data-stage="${stage}"]`);
@@ -342,7 +351,10 @@ function renderExtraction(extraction) {
   $("#metricEntities").textContent = entities.length;
   $("#metricConfidence").textContent = `${Math.round(extraction.overall_confidence * 100)}%`;
   $("#metricReview").textContent = needsReview;
-  $("#metricCriteria").textContent = state.job?.grounding?.criteria?.length ?? "—";
+  const criteria = state.job?.adjudication?.criteria;
+  $("#metricCriteria").textContent = criteria?.length
+    ? `${criteria.filter((item) => item.status === "met").length}/${criteria.length}`
+    : "—";
 
   if (extraction.review_reasons?.length) {
     const callout = $("#reviewReasons");
@@ -379,56 +391,6 @@ function renderExtraction(extraction) {
     $("#missingFields").classList.add("hidden");
     $("#missingFields").innerHTML = "";
   }
-}
-
-function renderGrounding(grounding) {
-  const criteria = grounding.criteria || [];
-  const passages = grounding.passages || [];
-  $("#groundingPanel").classList.remove("hidden");
-  $("#metricCriteria").textContent = criteria.length;
-  $("#policyNumber").textContent = `Policy ${grounding.policy_number || "—"}`;
-  $("#policyEffective").textContent = `Effective ${grounding.effective_date || "—"}`;
-  $("#groundingSummary").textContent = grounding.summary || "Human review is required.";
-  $("#passageCount").textContent = `${passages.length} passage${passages.length === 1 ? "" : "s"}`;
-
-  const warnings = grounding.warnings || [];
-  const warningBox = $("#groundingWarnings");
-  warningBox.classList.toggle("hidden", warnings.length === 0);
-  warningBox.innerHTML = warnings.length
-    ? `<strong>Grounding notes</strong><ul>${warnings.map((warning) => `<li>${escapeHtml(warning)}</li>`).join("")}</ul>`
-    : "";
-
-  $("#criteriaRows").innerHTML = criteria.length
-    ? criteria.map(renderCriterionRow).join("")
-    : '<tr><td colspan="5" class="empty-table">No criteria were produced. A reviewer must inspect the packet and policy directly.</td></tr>';
-  $("#retrievedPassages").innerHTML = passages.length
-    ? passages.map(renderPassage).join("")
-    : '<div class="empty-passage">No passage cleared the configured retrieval threshold.</div>';
-}
-
-function renderCriterionRow(criterion) {
-  const status = ["met", "not_met", "unknown"].includes(criterion.status) ? criterion.status : "unknown";
-  const labels = { met: "Met", not_met: "Not met", unknown: "Unknown" };
-  const patientEvidence = criterion.patient_evidence?.length
-    ? criterion.patient_evidence.map((item) => `<span>${escapeHtml(item)}</span>`).join("")
-    : '<em>Not found in packet</em>';
-  const citations = criterion.guideline_citations?.length
-    ? criterion.guideline_citations.map((item) => `<span>${escapeHtml(item)}</span>`).join("")
-    : '<em>No valid citation</em>';
-  return `<tr class="criterion-row ${status}">
-    <td><strong>${escapeHtml(criterion.criterion)}</strong><small>${Math.round((criterion.confidence || 0) * 100)}% assessment confidence</small></td>
-    <td><span class="criterion-status ${status}"><i></i>${labels[status]}</span></td>
-    <td class="stacked-cell">${patientEvidence}</td>
-    <td class="stacked-cell citation-cell">${citations}</td>
-    <td class="rationale-cell">${escapeHtml(criterion.rationale || "Human review required.")}</td>
-  </tr>`;
-}
-
-function renderPassage(passage) {
-  return `<article class="passage-card">
-    <div><strong>${escapeHtml(passage.section)}</strong><span>${escapeHtml(passage.citation)}</span><b>${Math.round((passage.score || 0) * 100)}% match</b></div>
-    <p>${escapeHtml(passage.text)}</p>
-  </article>`;
 }
 
 function renderEntityRow(entity, sectionNames) {

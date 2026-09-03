@@ -10,3 +10,8 @@ data/*.db-*
 data/uploads/
 knowledge/index/
 tmp/
+data/synthetic/
+data/eval/
+!data/eval/report.md
+docs/transcript.md
+_Case Study Assessment Format- AI Engineer.pdf
