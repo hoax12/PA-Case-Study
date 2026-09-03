@@ -18,3 +18,4 @@ data/eval/*
 !data/eval/cache/
 docs/transcript.md
 _Case Study Assessment Format- AI Engineer.pdf
+.claude/
