@@ -25,7 +25,8 @@ span:
   *missing* information (as opposed to contradicting evidence) it states what to
   request and from whom. For example: "ask the ordering provider for a
   documented BMI value", or "confirm the primary surgery date written
-  '09/03/25'; it can be read more than one way". The reviewer starts with a work order, not a puzzle.
+  '09/03/25'; it can be read more than one way". The reviewer starts with a
+  work order, not a puzzle.
 
 It cannot produce a denial. Not "is instructed not to"; it cannot. See §7.
 
@@ -100,10 +101,21 @@ exclusions, and 2 cross-references.
 `scripts/extract_policy_draft.py` sends a payer PDF to Claude with the `Policy`
 schema as the structured-output format and writes `_draft_<name>.yaml`. The
 registry **refuses to load any file beginning with an underscore**, so a
-machine-drafted policy cannot decide coverage until a person renames it. The
-script then re-reads the source PDF and reports which drafted clauses it could
-*not* find verbatim on their cited page, so review effort goes where the model was
-unreliable rather than over the whole document.
+machine-drafted policy cannot decide coverage until a person renames it.
+
+Automated verification then checks the draft three ways: it is schema-valid,
+every clause text appears verbatim on the page it cites (the script re-reads
+the source PDF), and there are no obvious inconsistencies such as duplicate
+criterion ids. Failures are reported so review attention concentrates where
+the model was unreliable.
+
+Those flags narrow attention; they do not replace approval. **Every drafted
+policy is reviewed in full before activation**, because the automated checks
+establish source-text correctness, not predicate-semantic correctness: a clause
+can be copied perfectly while its predicate encodes the wrong meaning, say a
+one-year window anchored to `order_date` when the clause means the surgery
+date. No verifier catches that; a person reading the clause beside its
+predicate does.
 
 This is the honest division of labour: the model does the tedious transcription
 into a schema; a human owns the artifact that decides coverage.
@@ -345,7 +357,8 @@ the model.
 
 | metric | result |
 |---|---|
-| **False-affirmation rate** | **0/8** |
+| **False affirmations** | **0 of 7 non-affirmable cases** |
+| Eligible affirmations achieved | 1 of 1 |
 | Outcome accuracy | 8/8 |
 | Per-criterion status accuracy | 82/82 |
 | Evidence traceability | 78/78 spans matched the transcript |
@@ -509,8 +522,10 @@ authentication, and audit review.
 Stated plainly, because a partial solution that is honest about its edges is worth
 more than one that is not.
 
-- **No evaluation numbers yet.** The harness exists; it has not been run against
-  live models. See §5.
+- **The evaluation set is eight packets.** The numbers in §5 are real, from live
+  model calls on the production pipeline, but a set this small demonstrates the
+  method rather than establishing production safety. That takes hundreds of
+  real adjudicated packets.
 - **Adult primary bariatric surgery is not adjudicable.** MGB-008 delegates it to
   InterQual, which is licensed and not in the document. Those requests always
   refer. The most common bariatric request is therefore out of scope by the
@@ -542,7 +557,7 @@ python -m pip install -e ".[dev]"
 # Live mode. Either the environment, or a .env at the repo root (gitignored).
 $env:ANTHROPIC_API_KEY = "sk-ant-..."
 
-.\.venv\Scripts\python.exe -m pytest -q                          # 95 tests, no network
+.\.venv\Scripts\python.exe -m pytest -q                          # 107 tests, no network
 .\.venv\Scripts\python.exe scripts\make_synthetic_packets.py     # 8 golden packets
 .\.venv\Scripts\python.exe scripts\evaluate.py                   # live: ~$6.50, ~9 min
 .\.venv\Scripts\python.exe scripts\evaluate.py --cached          # replay: free
@@ -566,4 +581,4 @@ rehearsal. Fixture output is not a model result and must never be presented as o
 | `scripts/extract_policy_draft.py` | draft a new payer's YAML for review |
 | `scripts/make_synthetic_packets.py` | the evaluation set |
 | `scripts/evaluate.py` | the metrics; writes `data/eval/report.md` |
-| `tests/` | 95 tests; `test_adjudication.py` and `test_registry.py` are the ones that matter |
+| `tests/` | 107 tests; `test_adjudication.py` and `test_registry.py` are the ones that matter |

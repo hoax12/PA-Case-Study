@@ -328,12 +328,28 @@ def build_report(runs: list[CaseRun], cached: bool) -> str:
         if run.predicted == "provisional_affirmation"
         and run.expected_outcome == "refer_to_human"
     ]
-    add(f"**FAR = {percent(len(false_affirms), len(scored))}**: target 0.\n")
+    # Only a case whose ground truth refers can be falsely affirmed, so the
+    # denominator is the non-affirmable set, not every packet.
+    refutable = [run for run in scored if run.expected_outcome == "refer_to_human"]
+    eligible = [
+        run for run in scored if run.expected_outcome == "provisional_affirmation"
+    ]
+    add(f"**FAR = {percent(len(false_affirms), len(refutable))}** of non-affirmable "
+        "cases: target 0.\n")
     for run in false_affirms:
         add(f"- `{run.name}` was affirmed but the ground truth refers it.")
     if not false_affirms:
         add("No packet was affirmed against its ground truth.")
     add("")
+    affirmed_eligible = [
+        run for run in eligible if run.predicted == "provisional_affirmation"
+    ]
+    add(
+        f"Eligible affirmations achieved: "
+        f"**{percent(len(affirmed_eligible), len(eligible))}**. Reporting this "
+        "beside FAR matters: a system that referred everything would score a "
+        "perfect FAR and be worthless.\n"
+    )
 
     add("## 3. Coverage vs. threshold (risk/coverage curve)\n")
     affirmable = [run for run in scored if run.expected_outcome == "provisional_affirmation"]
@@ -428,6 +444,11 @@ def build_report(runs: list[CaseRun], cached: bool) -> str:
 
 
 async def main() -> int:
+    # The report contains τ, ≥ and arrows. A Windows console defaults to cp1252
+    # and would raise on the final print, after the file was already written.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--cached",

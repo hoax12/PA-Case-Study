@@ -34,7 +34,8 @@ Measured over eight synthetic packets against Claude Opus 5:
 
 | metric | result |
 |---|---|
-| False-affirmation rate (primary) | 0/8 |
+| False affirmations (primary) | 0 of 7 non-affirmable cases |
+| Eligible affirmations achieved | 1 of 1 |
 | Outcome accuracy | 8/8 |
 | Per-criterion status accuracy | 82/82 |
 | Evidence traceability | 78/78 |
@@ -52,7 +53,7 @@ python -m pip install -e ".[dev]"
 # Live mode. Either the environment, or a .env at the repo root (gitignored).
 $env:ANTHROPIC_API_KEY = "sk-ant-..."
 
-python -m pytest -q                        # 97 tests, no network
+python -m pytest -q                        # 107 tests, no network
 python scripts\make_synthetic_packets.py   # 8 evaluation packets
 python scripts\evaluate.py --cached        # metrics, replayed from cache
 python -m uvicorn app.main:app --port 8000
