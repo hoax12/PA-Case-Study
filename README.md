@@ -22,7 +22,11 @@ code you can read, test, and diff.
 
 ## Design
 
-**[docs/DESIGN.md](docs/DESIGN.md)** is the document to read — the knowledge
+**Start with [docs/SUBMISSION.md](docs/SUBMISSION.md)** — the plain-English
+walkthrough of the core idea, the decisions and their trade-offs, and the
+assumptions, written for a reader with no prior context.
+
+**[docs/DESIGN.md](docs/DESIGN.md)** is the technical deep dive — the knowledge
 representation, the temporal engine, the evaluation methodology and its results,
 the deployment and feedback plan, and the limitations.
 
