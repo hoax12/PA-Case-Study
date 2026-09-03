@@ -286,13 +286,13 @@ def build_report(runs: list[CaseRun], cached: bool) -> str:
     lines: list[str] = []
     add = lines.append
 
-    add("# Evaluation report — prior-authorization adjudication\n")
+    add("# Evaluation report: prior-authorization adjudication\n")
     add(
         "The two errors are not symmetric. A **false affirmation** clears a request "
         "the guideline does not support and the payer owns the consequence. A **false "
         "referral** costs a reviewer a few minutes. So the false-affirmation rate is "
-        "the primary metric and must be zero; coverage — the share of genuinely "
-        "clear-cut approvals the system removes from the queue — is optimised only "
+        "the primary metric and must be zero; coverage, the share of genuinely "
+        "clear-cut approvals the system removes from the queue, is optimised only "
         "inside that constraint.\n"
     )
     add(f"- Packets: {len(runs)}")
@@ -328,7 +328,7 @@ def build_report(runs: list[CaseRun], cached: bool) -> str:
         if run.predicted == "provisional_affirmation"
         and run.expected_outcome == "refer_to_human"
     ]
-    add(f"**FAR = {percent(len(false_affirms), len(scored))}** — target 0.\n")
+    add(f"**FAR = {percent(len(false_affirms), len(scored))}**: target 0.\n")
     for run in false_affirms:
         add(f"- `{run.name}` was affirmed but the ground truth refers it.")
     if not false_affirms:
@@ -354,7 +354,7 @@ def build_report(runs: list[CaseRun], cached: bool) -> str:
         "\nFAR stays 0 at every τ: the packets that must be referred fail on their "
         "predicate (NOT_MET or UNKNOWN), and no threshold can turn those into an "
         "affirmation. τ only removes coverage. The cliff between 0.7 and 0.9 is "
-        "structural, not empirical — a satisfied boolean or attestation criterion is "
+        "structural, not empirical: a satisfied boolean or attestation criterion is "
         "scored 0.8, and confidence is the minimum across criteria, so τ > 0.8 refers "
         "every packet that rests on documented attestations. That is the honest "
         "reading: on this set τ buys no safety, and 0.9 would cost all of it.\n"
@@ -421,7 +421,7 @@ def build_report(runs: list[CaseRun], cached: bool) -> str:
         "understates a cold packet. Measured cold on the same eight packets, the "
         "full pipeline (OCR of every page, extraction, evidence) ran **$0.79–$0.86 "
         "and 64–78 s per packet**. Latency is dominated by per-page OCR, which is "
-        "trivially parallel; nothing here is on an interactive path — a reviewer "
+        "trivially parallel, and nothing here is on an interactive path: a reviewer "
         "opens a packet the pipeline finished minutes earlier.\n"
     )
     return "\n".join(lines)

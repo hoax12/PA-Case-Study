@@ -5,9 +5,9 @@ extracts the clinical facts, routes the request to the guideline that governs it
 evaluates every clause of that guideline against the packet, and returns one of
 two outcomes:
 
-- **Provisional affirmation** — every criterion is met, each citing the clause and
+- **Provisional affirmation**: every criterion is met, each citing the clause and
   page it was checked against. Reversible, and never final.
-- **Refer to human** — anything else, with the blocking clauses named and, for
+- **Refer to human**: anything else, with the blocking clauses named and, for
   each criterion that failed on missing information, what to request and from
   whom (e.g. "ask the ordering provider for a documented BMI value").
 
@@ -22,11 +22,11 @@ code you can read, test, and diff.
 
 ## Design
 
-**Start with [docs/SUBMISSION.md](docs/SUBMISSION.md)** — the plain-English
+**Start with [docs/SUBMISSION.md](docs/SUBMISSION.md)**: the plain-English
 walkthrough of the core idea, the decisions and their trade-offs, and the
 assumptions, written for a reader with no prior context.
 
-**[docs/DESIGN.md](docs/DESIGN.md)** is the technical deep dive — the knowledge
+**[docs/DESIGN.md](docs/DESIGN.md)** is the technical deep dive: the knowledge
 representation, the temporal engine, the evaluation methodology and its results,
 the deployment and feedback plan, and the limitations.
 
@@ -66,12 +66,12 @@ rehearsal. Fixture output is not a model result and must never be shown as one.
 | path | what it holds |
 |---|---|
 | `app/registry.py` | policy loading, routing, clause lookup, BM25 search |
-| `app/adjudication.py` | predicate evaluation and `decide()` — the auditable core |
+| `app/adjudication.py` | predicate evaluation and `decide()`: the auditable core |
 | `app/temporal.py` | ambiguous-date resolution and window arithmetic |
 | `app/pipeline.py` | the sequence, end to end |
 | `app/providers_claude.py` | the three bounded model calls |
 | `knowledge/policies/*.yaml` | the guideline, as data |
-| `knowledge/catalog/pa_catalog.yaml` | the payer's PA index — which services need PA at all |
+| `knowledge/catalog/pa_catalog.yaml` | the payer's PA index: which services need PA at all |
 | `scripts/extract_policy_draft.py` | draft a new payer's YAML for review; `--diff` for revisions |
 | `scripts/evaluate.py` | the metrics |
 | `tests/` | `test_adjudication.py` and `test_registry.py` are the ones that matter |
@@ -83,7 +83,7 @@ replaced; `DESIGN.md` supersedes all of them.
 ## Limitations
 
 Adult primary bariatric surgery is delegated to InterQual and Medicare Advantage
-to CMS NCD 100.1 — neither criteria set is held here, so both always refer.
+to CMS NCD 100.1; neither criteria set is held here, so both always refer.
 Confidence is an uncalibrated legibility signal, not a probability. The
 evaluation set is synthetic and small. There is no authentication, audit
 retention, or PHI control; this is a prototype, not a deployable service.

@@ -369,7 +369,7 @@ class CriteriaRegistry:
         entry = self.catalog_lookup(procedure)
         if entry is not None and entry.policy_id in self.policies:
             # The catalog points at a policy we hold, so "not yet authored" would
-            # be false — the routing miss above is the truthful reason.
+            # be false; the routing miss above is the truthful reason.
             entry = None
         if entry is not None:
             guide = f"the {self.catalog.title} (p. {entry.page})"  # type: ignore[union-attr]

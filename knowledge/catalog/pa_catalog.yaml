@@ -1,16 +1,16 @@
-# Mass General Brigham Health Plan — Prior Authorization, Notification, and
+# Mass General Brigham Health Plan: Prior Authorization, Notification, and
 # Referral Guidelines ("the PA guide"). This is the payer's own index of which
 # services require PA at all. It is NOT clinical criteria: an entry here can say
 # "PA required, see Medical Policy X", but only an authored policy in
 # knowledge/policies/ can evaluate criteria. The catalog gives the router
-# breadth — every listed service gets an informed referral reason instead of
-# "nothing found" — and its unmatched-but-PA-required hits are the authoring
+# breadth: every listed service gets an informed referral reason instead of
+# "nothing found", and its unmatched-but-PA-required hits are the authoring
 # backlog, sorted by request volume.
 #
 # pa_required values:
-#   "yes"    — PA required (for at least the common case)
-#   "no"     — no PA required
-#   "varies" — depends on plan / product / code; the note says how
+#   "yes"   : PA required (for at least the common case)
+#   "no"    : no PA required
+#   "varies": depends on plan / product / code; the note says how
 #
 # Pages cite the printed page numbers in PAGuide.pdf. Entries are curated from
 # the source table by a human, same review stance as a policy file: a machine
@@ -31,12 +31,12 @@ services:
     pa_required: "varies"
     note: "No PA for office visits within plan limits; PA required for the treatment of pain. See Medical Policy: Acupuncture."
 
-  - service: "Ambulance — Emergency Transportation"
+  - service: "Ambulance - Emergency Transportation"
     aliases: ["emergency ambulance", "specialty care transport"]
     page: 3
     pa_required: "no"
 
-  - service: "Ambulance — Non-emergent Transportation"
+  - service: "Ambulance - Non-emergent Transportation"
     aliases: ["non-emergency transportation", "non-emergent ambulance"]
     page: 3
     pa_required: "varies"
@@ -141,7 +141,7 @@ services:
     pa_required: "yes"
     note: "See Medical Policies: Gender Affirming Procedures."
 
-  - service: "Genetic — Molecular Genomic Testing"
+  - service: "Genetic - Molecular Genomic Testing"
     aliases: ["genetic testing", "genomic testing"]
     page: 8
     pa_required: "yes"

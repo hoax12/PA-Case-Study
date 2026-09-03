@@ -40,7 +40,7 @@ Commands:
 
 ## Recommended 12-minute narrative
 
-### 1. Problem and safety boundary — 1 minute
+### 1. Problem and safety boundary: 1 minute
 
 “Prior-authorization packets arrive as heterogeneous images. The first problem
 is not policy reasoning; it is converting those documents into trustworthy,
@@ -53,7 +53,7 @@ Point to:
 - the human-in-the-loop label;
 - the explicit confidence legend.
 
-### 2. Architecture and orchestration — 2 minutes
+### 2. Architecture and orchestration: 2 minutes
 
 Explain:
 
@@ -68,7 +68,7 @@ Senior-level rationale: deterministic application code owns safety invariants,
 validation, and persistence. The LLM coordinates bounded tools but does not own
 the domain record.
 
-### 3. Live upload and tool trace — 3 minutes
+### 3. Live upload and tool trace: 3 minutes
 
 1. Select `med2.webp`.
 2. Reopen the chooser and add `Prior-Authorization-Form.jpg` to show additive
@@ -81,7 +81,7 @@ the domain record.
 Do not overpromise latency. OCR processes documents individually and live model
 capacity can vary.
 
-### 4. Evidence and guideline review — 3 minutes
+### 4. Evidence and guideline review: 3 minutes
 
 Show:
 
@@ -97,14 +97,14 @@ append-only and the original extraction remains available in persistence.
 
 Then show the criteria matrix and retrieved passages. The supplied infant note
 and blank PA form are intentionally insufficient for bariatric eligibility, so
-the correct outcome is mostly/all `Unknown`—not a fabricated denial. Point to a
+the correct outcome is mostly/all `Unknown`, not a fabricated denial. Point to a
 page citation and explain that the matrix is preliminary decision support.
 
 Open “View retrieved policy passages” and connect one matrix row to its source
 page and section. This demonstrates the full claim-to-source chain rather than
 presenting RAG as a generic PDF chat experience.
 
-### 5. Evaluation and tradeoffs — 2 minutes
+### 5. Evaluation and tradeoffs: 2 minutes
 
 State clearly:
 
@@ -119,7 +119,7 @@ State clearly:
 Explain why entity confidence is capped by source legibility: downstream
 certainty cannot exceed the evidence it depends on.
 
-### 6. Boundary and next phase — 1 minute
+### 6. Boundary and next phase: 1 minute
 
 The current build implements local guideline retrieval and a preliminary matrix:
 
@@ -204,7 +204,7 @@ human outcome gate.
 
 ## Three-day delivery framing
 
-### Day 1 — implemented foundation
+### Day 1: implemented foundation
 
 - typed OCR and extraction contracts;
 - ADK agent and tools;
@@ -212,14 +212,14 @@ human outcome gate.
 - upload, SSE, confidence, correction UI;
 - deterministic fixture and contract tests.
 
-### Day 2 — implemented guideline phase
+### Day 2: implemented guideline phase
 
 - parse and version the bariatric guideline;
 - build citation-preserving retrieval;
 - implement a reviewed subset of structured criteria;
 - add unknown/missing-evidence handling.
 
-### Day 3 — evaluation and presentation
+### Day 3: evaluation and presentation
 
 - golden cases and error slices;
 - calibration analysis;

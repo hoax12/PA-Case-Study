@@ -18,22 +18,22 @@ system produces one of two outcomes, with a confidence signal and a rationale in
 which every claim is traceable to both a guideline clause and a patient-record
 span:
 
-- **Provisional affirmation** — every criterion in the governing policy is met on
+- **Provisional affirmation**: every criterion in the governing policy is met on
   cited evidence, above a confidence threshold. No person needs to look at it.
-- **Refer to human clinical review** — anything else. A referral is not a bare
+- **Refer to human clinical review**: anything else. A referral is not a bare
   hand-off: it names the blocking clauses, and for every criterion that failed on
   *missing* information (as opposed to contradicting evidence) it states what to
-  request and from whom — "ask the ordering provider for a documented BMI value",
-  "confirm the primary surgery date written '09/03/25' — it can be read more than
-  one way". The reviewer starts with a work order, not a puzzle.
+  request and from whom. For example: "ask the ordering provider for a
+  documented BMI value", or "confirm the primary surgery date written
+  '09/03/25'; it can be read more than one way". The reviewer starts with a work order, not a puzzle.
 
-It cannot produce a denial. Not "is instructed not to" — cannot; see §7.
+It cannot produce a denial. Not "is instructed not to"; it cannot. See §7.
 
 ```
 upload (png / jpg / webp / pdf)
    │  main.py          validation, job record, SSE event stream
    ▼
-run_job()              pipeline.py — deterministic, seven steps
+run_job()              pipeline.py: deterministic, seven steps
    1  ocr              Claude vision      → OcrBatchResult      ← model
    2  extract          Claude structured  → ExtractionResult    ← model
    3  route            registry.route()   → RouteResult | NoRouteReason
@@ -60,7 +60,7 @@ decides.
 
 A payer guideline is not prose to be retrieved. It is a set of numbered criteria,
 each of which is a predicate over patient facts. `knowledge/policies/*.yaml`
-stores exactly that — one node per numbered clause:
+stores exactly that, with one node per numbered clause:
 
 ```yaml
 - id: MGB-008.TORe.5
@@ -122,7 +122,7 @@ all of which this replaces:
    no index to rebuild, and no silent staleness when the model changes.
 3. **Cross-references were invisible.** "See Medicare Advantage criteria above",
    "If Medicare Advantage criteria are not met, then MassHealth criteria are
-   applied", InterQual, NCD 100.1, LCD L35022 — these are now first-class
+   applied", InterQual, NCD 100.1, LCD L35022. These are now first-class
    `external_ref` nodes that force a referral with a named reason, instead of text
    that retrieval could return and a model could gloss over.
 
@@ -136,22 +136,22 @@ source is worse than no citation, so it is enforced rather than trusted.
 
 ### Scaling to many policies
 
-The scaling question is not "must someone author a YAML per policy?" — it is
+The scaling question is not "must someone author a YAML per policy?" It is
 "how small can the human review per policy get?" That cost exists in every
 architecture (a retrieval system still needs per-policy evaluation before it
 touches real requests); this design makes it small, targeted, and shrinking.
 Three tiers, all implemented:
 
 **Breadth first: the payer's own PA index as a catalog.** The payer publishes
-an index of *which services need PA at all* — for MGB, the Prior Authorization,
-Notification, and Referral Guidelines. `knowledge/catalog/pa_catalog.yaml`
+an index of *which services need PA at all* (for MGB, the Prior Authorization,
+Notification, and Referral Guidelines). `knowledge/catalog/pa_catalog.yaml`
 holds it as data (38 services, yes/no/varies, page-cited), and routing consults
 it whenever no criteria policy matches. So every cataloged service gets an
 informed answer on day one: *"the PA guide (p. 12) lists 'Nuclear Stress Tests'
 as not requiring prior authorization"*, or *"'Spinal Surgery' requires prior
-authorization, but the governing medical policy is not yet authored — a
-reviewer must adjudicate."* An entry can never adjudicate — only an authored
-policy holds criteria — but a referral that names the payer's own index beats
+authorization, but the governing medical policy is not yet authored, so a
+reviewer must adjudicate it."* An entry can never adjudicate (only an authored
+policy holds criteria), but a referral that names the payer's own index beats
 "nothing found." The catalog entry for a held policy defers to real routing.
 
 **Depth on demand.** Criteria policies are authored in request-volume order,
@@ -159,19 +159,19 @@ not upfront: every catalog-informed miss carries a `catalog_service` field, so
 production telemetry *is* the authoring backlog. Authoring payer N+1 is
 `extract_policy_draft.py` (model drafts the YAML, verifier flags every clause
 it cannot find verbatim on its cited page, a human reviews only the flags and
-renames the file) — zero code, because the six predicate types are closed over
+renames the file): zero code, because the six predicate types are closed over
 *how clauses decide*, not what they are about.
 
 **Updates re-review only the change.** When a payer revises a policy,
 `extract_policy_draft.py --diff` compares the new draft against the live file
 clause by clause and reports added, removed, and changed (text / page /
-predicate) criteria — so a revision to 2 of 44 clauses costs review of 2, not
+predicate) criteria, so a revision to 2 of 44 clauses costs review of 2, not
 44. Combined with `source_sha256` staleness detection, the update loop is:
 hash mismatch → redraft → clause diff → review the delta → rename.
 
 At hundreds of policies the flat directory becomes a database-backed registry
 with effective/termination dates, per-tenant scoping, and an approval workflow
-UI for clinical policy staff — but the unit of knowledge (a versioned,
+UI for clinical policy staff, but the unit of knowledge (a versioned,
 human-approved set of typed predicates with verbatim citations) does not change
 shape. The human never leaves the loop; the loop just gets cheap.
 
@@ -179,9 +179,9 @@ shape. The human never leaves the loop; the loop just gets cheap.
 
 Each policy carries `effective_date` and `source_sha256`; `/api/knowledge/status`
 reports whether the recorded hash still matches the PDF on disk. Production needs
-more — a policy registry with effective/termination dates, scheduled update
+more: a policy registry with effective/termination dates, scheduled update
 detection, per-tenant access control, rollback, and an approval gate before a new
-version can decide anything — but the shape here (versioned data + verification
+version can decide anything. But the shape here (versioned data + verification
 against source + human approval) is the one that scales to it.
 
 ---
@@ -212,11 +212,11 @@ criterion is **UNKNOWN**, and the reason names both:
 > earlier). The readings disagree about this window, so the date must be
 > confirmed.`
 
-When every reading agrees, the status is returned normally — ambiguity only blocks
+When every reading agrees, the status is returned normally; ambiguity only blocks
 a decision when it would change one.
 
 **What happens when a date is missing.** If the anchor is absent, UNKNOWN. If the
-*reference* is absent — no order date in the packet — also UNKNOWN, with
+*reference* is absent (no order date in the packet), also UNKNOWN, with
 "The window is anchored to the order date, which is not present in the packet."
 An ambiguous order date is treated as no order date, because an ambiguous anchor
 would silently shift every window hung off it.
@@ -243,7 +243,7 @@ an agent.
   the line it came from, and makes a reviewer's disagreement attributable to
   transcription or to extraction.
 - **Not an agent.** The earlier build used a Google ADK planner to call three
-  tools in a fixed order. A planner that must be told the order is not planning —
+  tools in a fixed order. A planner that must be told the order is not planning;
   it is latency, cost, and a second failure mode in exchange for nothing. It also
   produced three copies of the pipeline (planner path, 503-recovery path, fixture
   path) that could drift apart. One function now serves all three.
@@ -260,11 +260,11 @@ per deployment with `LLM_MODEL` (`claude-haiku-4-5` is the cheap setting):
 | OCR | handwriting, checkboxes, layout | lines + legibility + alternatives |
 | extraction | free text → typed entities | entities with verbatim spans |
 | evidence location | 44 clauses × a messy chart | values and spans, **per criterion** |
-| routing, evaluation, decision | — | *no model runs here* |
+| routing, evaluation, decision | n/a | *no model runs here* |
 
 The evidence step is prompted to find values, and its output schema
 (`CriterionEvidence`) has fields for `found`, `value`, `value_date`,
-`evidence_text`, `document_id` — and no field for whether the criterion is
+`evidence_text`, `document_id`, and no field for whether the criterion is
 satisfied. The model is not asked to judge, and the schema gives it nowhere to
 record a judgement if it tried.
 
@@ -278,11 +278,11 @@ record a judgement if it tried.
 
 The two error types are not comparable:
 
-- A **false affirmation** — the system auto-approves something a reviewer would
-  not — is a coverage error the payer owns, potentially a regulatory event, and by
+- A **false affirmation** (the system auto-approves something a reviewer would
+  not) is a coverage error the payer owns, potentially a regulatory event, and by
   construction nobody looked at it.
-- A **false referral** — the system refers something a reviewer would have
-  approved — costs reviewer minutes.
+- A **false referral** (the system refers something a reviewer would have
+  approved) costs reviewer minutes.
 
 So the primary metric is **false-affirmation rate (FAR)**, and the target is zero.
 The secondary metric is **coverage**: the share of genuinely clear-cut requests
@@ -311,14 +311,14 @@ affirmations at all.
 
 | case | perturbation | expected |
 |---|---|---|
-| `tore_affirm` | none — complete packet | **affirm**, 16/16 met |
-| `tore_temporal_fail` | primary surgery 8 months ago | refer — TORe.5 not met |
-| `tore_bmi_missing` | no height, weight, or BMI | refer — TORe.4 unknown |
-| `tore_tobacco_recent` | quit date 6 days inside the window | refer — TORe.10 not met |
-| `tore_ambiguous_date` | surgery date written `09/03/25` | refer — TORe.5 unknown |
-| `primary_rygb_delegated` | primary RYGB | refer — InterQual |
-| `medicare_tore` | same chart, Medicare Advantage | refer — NCD 100.1 |
-| `out_of_domain` | the two supplied images | refer — no applicable guideline |
+| `tore_affirm` | none: complete packet | **affirm**, 16/16 met |
+| `tore_temporal_fail` | primary surgery 8 months ago | refer: TORe.5 not met |
+| `tore_bmi_missing` | no height, weight, or BMI | refer: TORe.4 unknown |
+| `tore_tobacco_recent` | quit date 6 days inside the window | refer: TORe.10 not met |
+| `tore_ambiguous_date` | surgery date written `09/03/25` | refer: TORe.5 unknown |
+| `primary_rygb_delegated` | primary RYGB | refer: InterQual |
+| `medicare_tore` | same chart, Medicare Advantage | refer: NCD 100.1 |
+| `out_of_domain` | the two supplied images | refer: no applicable guideline |
 
 Packets are gitignored because `make_synthetic_packets.py` regenerates them
 deterministically.
@@ -327,7 +327,7 @@ deterministically.
 
 `tests/test_golden_cases.py` asserts, without a network, that each `expected.json`
 routes where it claims, names only clauses that exist in the registry, lists
-documents that are present, and — the important one — that feeding its stated
+documents that are present, and, the important one, that feeding its stated
 criteria matrix to `decide()` returns its stated outcome. Ground truth that
 disagrees with the decision function would make every metric computed against it
 wrong. This caught a real routing bug during the build: the Medicare Advantage
@@ -355,7 +355,7 @@ Coverage is 1/1 at τ = 0.5 and 0.7 and 0/1 at τ = 0.9, and FAR is 0 at every �
 The cliff is structural rather than empirical: a satisfied boolean or attestation
 criterion scores a hand-set 0.8 and packet confidence is the minimum across
 criteria, so any τ above 0.8 refers every packet resting on documented
-attestations. On this set τ buys no safety and 0.9 costs all the coverage — which
+attestations. On this set τ buys no safety and 0.9 costs all the coverage, which
 is the honest version of the previous paragraph's point that τ is an assertion,
 not a measurement.
 
@@ -380,12 +380,12 @@ boolean and attestation clause to have one.
 and `best_evidence_match` compared against single lines, so a correctly cited date
 was rejected as ungrounded and degraded to UNKNOWN. The gate now also tests
 adjacent line pairs, attributing the match to the line carrying the value. The
-window stops at two — a wider one would let a span assemble itself out of
+window stops at two; a wider one would let a span assemble itself out of
 scattered text, which is the thing the gate exists to catch.
 
 Both failures were conservative: every one of them referred a packet that should
-have been affirmed. That is the asymmetry working as designed — the defects cost
-coverage and never cost safety — but it is also why coverage needs its own metric.
+have been affirmed. That is the asymmetry working as designed (the defects cost
+coverage and never cost safety), but it is also why coverage needs its own metric.
 An evaluation that only watched FAR would have scored this run a clean zero and
 learned nothing.
 
@@ -393,13 +393,13 @@ learned nothing.
 
 **Authoring cost versus citation precision.** Writing 44 predicates by hand took
 longer than pointing an embedder at the PDF, and it does not generalize for free
-to the next payer — someone must review each drafted policy. In exchange, a
+to the next payer; someone must review each drafted policy. In exchange, a
 decision cites `MGB-008.TORe.5` with its verbatim text and page, the failure
 reason is a sentence a reviewer can check in seconds, and a paraphrased clause
 fails the build. For a system whose entire value is making a reviewer faster, the
 citation has to be exact, so the authoring cost is the right side to pay on. With
-more time the leverage is in halving the review effort — better drafting prompts,
-clause-level diffing when a policy is revised — not in going back to retrieval.
+more time the leverage is in halving the review effort (better drafting prompts,
+clause-level diffing when a policy is revised), not in going back to retrieval.
 
 **What I would do differently with more data.** The confidence numbers are
 hand-set constants (0.9 threshold, 0.85 temporal, 0.8 boolean). They order
@@ -421,9 +421,9 @@ idempotency keys and lease timeouts (a restart currently leaves a job marked
 record. The registry is read-only data and ships with the image.
 
 **Monitoring.** The metric that matters cannot be measured directly in production
-— nobody reviews the affirmations — so it is monitored by proxy:
+(nobody reviews the affirmations), so it is monitored by proxy:
 
-- **reviewer overrides of an affirmation** — the closest live signal to FAR. Any
+- **reviewer overrides of an affirmation**: the closest live signal to FAR. Any
   non-zero rate is an incident, not a trend.
 - coverage, and its drift after a policy update or a model change;
 - per-criterion disagreement rate, which localizes a regression to a clause;
@@ -443,7 +443,7 @@ feeds four things, in increasing order of caution:
 2. **A regression set.** Every override becomes a golden case, so a fixed bug
    stays fixed. This is where most of the value is.
 3. **Policy corrections.** A criterion with a high disagreement rate usually means
-   the predicate is wrong, not that the model is — the fix is a YAML edit and a
+   the predicate is wrong, not that the model is; the fix is a YAML edit and a
    re-review, tracked like any other policy change.
 4. **Extraction fine-tuning.** Enough corrected spans could train the evidence
    step. Only the *reading* step, never the deciding step.
@@ -456,7 +456,7 @@ tunes what the system is allowed to conclude.
 
 ## 7. How the no-denial guarantee is mechanical
 
-*(Presentation question 6 — the one the whole design is organized around.)*
+*(Presentation question 6, the one the whole design is organized around.)*
 
 Five independent layers, none of which is a prompt instruction:
 
@@ -464,15 +464,15 @@ Five independent layers, none of which is a prompt instruction:
    value to return, so no code path, model error, or injected instruction can
    produce one. `test_outcome_type_cannot_express_a_denial` asserts the member set.
 2. **The decision is not generated.** `decide()` is a pure function of the
-   criteria matrix — no I/O, no model call, no clock read except the one passed
+   criteria matrix: no I/O, no model call, no clock read except the one passed
    in. Identical inputs give identical outputs, always.
 3. **The model has nowhere to put a verdict.** `CriterionEvidence`, the evidence
    step's output schema, has `found`/`value`/`evidence_text` and no status field.
 4. **Absence never counts against the member.** Missing, ambiguous, untraceable,
    or delegated evidence is UNKNOWN, and any UNKNOWN forces a referral. A gap in
    the chart can only ever slow a request down, never deny it.
-5. **Exclusions refer, they do not deny.** A request hitting an exclusion clause —
-   the one case that most looks like an automatic no — is referred with the clause
+5. **Exclusions refer, they do not deny.** A request hitting an exclusion clause,
+   the one case that most looks like an automatic no, is referred with the clause
    attached, because non-coverage is a determination only a licensed reviewer may
    make.
 
@@ -499,7 +499,7 @@ tool paths are confined to the job's own upload directory; the evidence step's
 output schema cannot express a decision; and any evidence span that is not
 quotable from the transcript is discarded, so text injected into a document cannot
 become a fact. Retrieved policy text is treated the same way. This is defence in
-depth, not a complete control — production still needs adversarial evaluation,
+depth, not a complete control; production still needs adversarial evaluation,
 authentication, and audit review.
 
 ---
@@ -521,7 +521,7 @@ more than one that is not.
   no cursive. Real handwriting is the largest untested risk in the OCR step.
 - **One criteria policy, one specialty.** The PA catalog gives every listed
   service an informed routing answer, but only MGB-008 has authored, verified
-  criteria — every other PA-required service refers with "policy not yet
+  criteria; every other PA-required service refers with "policy not yet
   authored." The drafting, verification, and diff tooling for the next policy
   exists; the next policy itself does not.
 - **Not production-ready for PHI.** No authentication, authorization, tenancy,
@@ -558,7 +558,7 @@ rehearsal. Fixture output is not a model result and must never be presented as o
 | path | what it holds |
 |---|---|
 | `app/registry.py` | policy loading, routing, clause lookup, BM25 |
-| `app/adjudication.py` | predicate evaluation and `decide()` — the auditable core |
+| `app/adjudication.py` | predicate evaluation and `decide()`: the auditable core |
 | `app/temporal.py` | date resolution and window arithmetic |
 | `app/pipeline.py` | the seven steps |
 | `app/providers_claude.py` | the three model calls |

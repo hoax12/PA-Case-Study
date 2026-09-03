@@ -84,8 +84,8 @@ Separate field detection from value accuracy.
 - Missing-field recall.
 - Ambiguity/alternatives recall.
 
-For high-risk fields—patient identity, member ID, requested service or
-medication, diagnosis, dose, frequency, and provider NPI—publish per-field
+For high-risk fields, patient identity, member ID, requested service or
+medication, diagnosis, dose, frequency, and provider NPI, publish per-field
 results rather than only a micro-average.
 
 ## Confidence evaluation
