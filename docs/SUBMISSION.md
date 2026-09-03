@@ -111,7 +111,68 @@ reductions with different strengths: the determinism is structural, the
 injection defenses are hardening that still warrants adversarial testing
 (listed in future scope), not a proof.
 
-## 4. How guidelines are stored, and why not a vector database
+## 4. One request, two endings: a worked example
+
+A simple TORe (a revision of a previous weight-loss surgery) request:
+
+```
+INPUT
+Procedure:            TORe
+Line of business:     Commercial
+BMI:                  38.2
+Primary surgery:      RYGB on 2024-05-10
+Order date:           2026-09-01
+Diet consultation:    completed
+...and the rest of the chart
+```
+
+What each stage does with it:
+
+```
+1. TRANSCRIBE   "Current BMI 38.2"                          ← model reads
+                "Prior RYGB 05/10/2024"
+
+2. EXTRACT      bmi = 38.2                                   ← model, with quotes
+                primary_surgery_date = 2024-05-10
+                primary_procedure = RYGB
+
+3. ROUTE        Commercial + TORe → MGB-008, TORe criteria   ← code
+
+4. LOCATE       TORe.5 evidence: "Prior RYGB 05/10/2024"     ← model, per criterion
+
+5. EVALUATE     TORe.4  BMI 38.2, clause requires >= 35        → MET
+                TORe.5  surgery 2024-05-10 (2 years earlier)   → MET
+                        against order date 2026-09-01;
+                        the clause requires 1y
+                ...                                          ← code
+                16 of 16 MET
+
+6. DECIDE       every criterion met, on cited evidence       ← code
+                → PROVISIONAL AFFIRMATION
+```
+
+Now change **one field**. The surgery date is handwritten as `09/03/25`
+instead:
+
+```
+5. EVALUATE     TORe.5: '09/03/25' can be read as
+                  2025-09-03  (11 months earlier)  → not enough
+                  2025-03-09  (1y 5m earlier)      → enough
+                The readings disagree about this window        → UNKNOWN
+
+6. DECIDE       → REFER TO HUMAN
+
+   The reviewer sees, alongside the clause quoted from page 4:
+   "To resolve before re-submission: ask the ordering provider to
+    confirm the primary surgery date written '09/03/25'; it can be
+    read more than one way."
+```
+
+Same packet, one ambiguous handwritten date, and the system's answer changes
+from "affirm, with citations" to "a human should look, and here is exactly
+what to ask for." It never guessed.
+
+## 5. How guidelines are stored, and why not a vector database
 
 A payer guideline looks like prose, but it is really a numbered list of
 checkable requirements. So I store it as exactly that: one entry per numbered
@@ -155,7 +216,7 @@ PDF and asserts that **all 44 stored clause texts appear verbatim on the page
 they cite**. If anyone paraphrases a clause or a page number drifts, the build
 fails. A citation that doesn't match the source is worse than no citation.
 
-## 5. How this scales beyond one policy
+## 6. How this scales beyond one policy
 
 The fair challenge: "You encoded one policy by hand. Payers have hundreds."
 My answer is that the *authoring* is automatable, but the *accountability* is
@@ -197,7 +258,7 @@ PDF flags staleness automatically.
 The one-line version: **the human never leaves the loop; the loop just gets
 cheap.**
 
-## 6. The decisions and their trade-offs
+## 7. The decisions and their trade-offs
 
 **Decision 1: a fixed pipeline, not an AI agent.**
 My first build used an agent framework where a planner model chose which tool
@@ -249,7 +310,7 @@ automated path cannot represent a denial") are only credible when executable.
 The evaluation run also caught two real bugs that a paper design would have
 shipped (see below), which I take as evidence the prototype was worth building.
 
-## 7. What I measured
+## 8. What I measured
 
 I built eight synthetic test packets with per-criterion ground truth (real
 patient data wasn't available, correctly so; the two supplied sample images are
@@ -306,7 +367,7 @@ measuring only safety would have hidden them. 107 automated tests now pass,
 including a fuzz test that hammers the decision function with 500 random
 inputs and asserts the outcome set stays closed.
 
-## 8. Assumptions I made
+## 9. Assumptions I made
 
 1. **Wrongly approving is far worse than wrongly referring.** The entire
    design leans on this asymmetry. If the business goal were maximum
@@ -327,7 +388,7 @@ inputs and asserts the outcome set stays closed.
 6. **No PHI in this prototype.** No authentication, encryption at rest, or
    audit retention; listed as production work, not silently assumed away.
 
-## 9. Production readiness and future scope
+## 10. Production readiness and future scope
 
 What separates this prototype from a deployable service, by area:
 
@@ -356,7 +417,7 @@ What separates this prototype from a deployable service, by area:
   UNKNOWN criteria ("find any tobacco mention anywhere in the packet") before
   giving up; a real search problem, unlike ordering six fixed steps.
 
-## 10. Reading and running the rest
+## 11. Reading and running the rest
 
 | Where | What |
 |---|---|

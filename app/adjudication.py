@@ -291,7 +291,7 @@ def _evaluate_temporal(
             confidence=0.0,
             missing=(
                 f"Ask the ordering provider to confirm the "
-                f"{predicate.anchor.replace('_', ' ')} written '{resolved.raw}' — "
+                f"{predicate.anchor.replace('_', ' ')} written '{resolved.raw}'; "
                 "it can be read more than one way."
             ),
         )
