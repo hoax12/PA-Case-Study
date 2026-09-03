@@ -55,8 +55,6 @@ decides.
 
 ## 2. How guidelines are ingested, and how the representation generalizes
 
-*(Presentation question 1. Deep-dive area: Knowledge Management.)*
-
 ### The representation
 
 A payer guideline is not prose to be retrieved. It is a set of numbered criteria,
@@ -200,8 +198,6 @@ against source + human approval) is the one that scales to it.
 
 ## 3. One temporal criterion, end to end
 
-*(Presentation question 2.)*
-
 Take **MGB-008.TORe.5**: *"The primary surgery was performed at least one year
 ago."*
 
@@ -244,8 +240,6 @@ data in the YAML rather than an assumption in code.
 
 ## 4. Model architecture, and why
 
-*(Presentation question 3.)*
-
 **A deterministic pipeline with bounded model calls.** Not one big prompt, and not
 an agent.
 
@@ -283,8 +277,6 @@ record a judgement if it tried.
 ---
 
 ## 5. Deep dive: evaluation
-
-*(Presentation question 4, part two. Deep-dive area: Evaluation.)*
 
 ### The metric, and why it is asymmetric
 
@@ -424,8 +416,6 @@ risk/coverage curve rather than by assertion.
 ---
 
 ## 6. Deployment, monitoring, and the feedback loop
-
-*(Presentation question 5.)*
 
 **Deployment.** The prototype is a single FastAPI process with SQLite and
 in-process background tasks. Production replaces those three: a durable queue with
