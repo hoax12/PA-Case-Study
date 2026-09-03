@@ -13,5 +13,8 @@ tmp/
 data/synthetic/
 data/eval/*
 !data/eval/report.md
+# Cached model outputs for the eight synthetic packets. Tracked so anyone can
+# reproduce the evaluation with `evaluate.py --cached`, offline and unbilled.
+!data/eval/cache/
 docs/transcript.md
 _Case Study Assessment Format- AI Engineer.pdf

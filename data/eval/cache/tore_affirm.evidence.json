@@ -1,0 +1,146 @@
+[
+  {
+    "criterion_id": "MGB-008.TORe.1",
+    "found": true,
+    "value": "44",
+    "value_date": "1982-04-11",
+    "evidence_text": "Age: 44 years",
+    "document_id": "document-2",
+    "page": null
+  },
+  {
+    "criterion_id": "MGB-008.TORe.2",
+    "found": true,
+    "value": "yes",
+    "value_date": null,
+    "evidence_text": "Request type: Revisional bariatric procedure",
+    "document_id": "document-1",
+    "page": null
+  },
+  {
+    "criterion_id": "MGB-008.TORe.3",
+    "found": true,
+    "value": "yes",
+    "value_date": null,
+    "evidence_text": "Member was unable to maintain at least 50% excess body weight loss; EWL 31% at 24 months post-operatively.",
+    "document_id": "document-3",
+    "page": null
+  },
+  {
+    "criterion_id": "MGB-008.TORe.4",
+    "found": true,
+    "value": "38.2",
+    "value_date": "2026-08-20",
+    "evidence_text": "BMI: 38.2 kg/m2 measured 2026-08-20",
+    "document_id": "document-2",
+    "page": null
+  },
+  {
+    "criterion_id": "MGB-008.TORe.5",
+    "found": true,
+    "value": "2019-06-14",
+    "value_date": "2019-06-14",
+    "evidence_text": "Primary surgery date:\n2019-06-14",
+    "document_id": "document-3",
+    "page": null
+  },
+  {
+    "criterion_id": "MGB-008.TORe.6",
+    "found": true,
+    "value": "yes",
+    "value_date": null,
+    "evidence_text": "Diet and activity adherence: Documented adherence to diet and physical activity since the primary surgery; visit notes on file for 2024, 2025 and 2026.",
+    "document_id": "document-2",
+    "page": null
+  },
+  {
+    "criterion_id": "MGB-008.TORe.7",
+    "found": true,
+    "value": "yes",
+    "value_date": null,
+    "evidence_text": "Substance use: No substance use disorder documented.",
+    "document_id": "document-2",
+    "page": null
+  },
+  {
+    "criterion_id": "MGB-008.TORe.8",
+    "found": true,
+    "value": "yes",
+    "value_date": null,
+    "evidence_text": "Psychiatric history: No psychiatric disorder documented.",
+    "document_id": "document-2",
+    "page": null
+  },
+  {
+    "criterion_id": "MGB-008.TORe.9",
+    "found": true,
+    "value": "yes",
+    "value_date": "2026-07-15",
+    "evidence_text": "Psychosocial evaluation: Completed 2026-07-15. Cleared for surgery by behavioral health provider.",
+    "document_id": "document-2",
+    "page": null
+  },
+  {
+    "criterion_id": "MGB-008.TORe.10",
+    "found": true,
+    "value": "never",
+    "value_date": null,
+    "evidence_text": "Tobacco history: Never used tobacco. Lifetime non-smoker.",
+    "document_id": "document-2",
+    "page": null
+  },
+  {
+    "criterion_id": "MGB-008.TORe.11",
+    "found": true,
+    "value": "yes",
+    "value_date": "2026-07-02",
+    "evidence_text": "Dietary consultation: Completed 2026-07-02 with registered dietitian.",
+    "document_id": "document-2",
+    "page": null
+  },
+  {
+    "criterion_id": "MGB-008.TORe.12",
+    "found": true,
+    "value": "yes",
+    "value_date": null,
+    "evidence_text": "Procedure understanding: Member attests she understands the surgical procedure and post procedure compliance.",
+    "document_id": "document-2",
+    "page": null
+  },
+  {
+    "criterion_id": "MGB-008.TORe.13",
+    "found": true,
+    "value": "yes",
+    "value_date": null,
+    "evidence_text": "Follow-up plan: Follow-up planned with the bariatric care team at 2, 6 and 12 weeks.",
+    "document_id": "document-2",
+    "page": null
+  },
+  {
+    "criterion_id": "MGB-008.TORe.14",
+    "found": true,
+    "value": "yes",
+    "value_date": null,
+    "evidence_text": "Pregnancy attestation: Member attests she is not pregnant and does not plan to become pregnant for at least 18 months after surgery.",
+    "document_id": "document-2",
+    "page": null
+  },
+  {
+    "criterion_id": "MGB-008.TORe.15",
+    "found": true,
+    "value": "yes",
+    "value_date": null,
+    "evidence_text": "Facility: Bariatric surgery center, Metro West Surgical",
+    "document_id": "document-1",
+    "page": null
+  },
+  {
+    "criterion_id": "MGB-008.TORe.16",
+    "found": true,
+    "value": "RYGB",
+    "value_date": null,
+    "evidence_text": "Primary bariatric procedure:\nRYGB",
+    "document_id": "document-3",
+    "page": null
+  }
+]

@@ -1,0 +1,872 @@
+{
+  "documents": [
+    {
+      "document_id": "document-1",
+      "file_name": "med2.webp",
+      "document_type": "Medical clinic intake/exam form (bilingual English-Spanish), handwritten entries",
+      "raw_text": "DATE 07/04/14  COMPLAINT parasitos, vitaminas\nMALE  (FEMALE)  HT. ______  WT. 19 lbs  B/P ______  TEMP 97.1  PULSE 130\nSibilancias / Wheezing\nDolor de cabeza / Headache\nDolor abdominal / Abdominal Pain\nProblemas para respirar / Breathing Problems\nTos / Cough  - well check\n- vitamins\nEl lloro / Crying\nFiebre / Fever\nDolor de pecho / Chest Pain\nProblemas menstrual / Menstrual Problems\nCargue la perdida / Weight loss\nFatiga / Fatigue\nDiarrea / Diarrhea\nNariz Liquida / Runny Nose\nApoye el dolor / Back Pain\nPalidezca/anemia / Pale/Anemia\nPicaz\u00f3n en los ojos / Itchy Eyes\nSudores / Sweats\nCalambres / Cramps\nDolor de hueso / Bone Pain\nGarganta adolorida / Sore Throat\nPERTINENT MEDICAL HISTORY:\nThe patient is 1yr old and weigh\nNO    YES    If yes, explain  19 lbs  Not eating well\nHeart Disease  \u2713  ___   No diarrea.  No N/V.\nHypertension  \u2713  ___\nDiabetes  \u2713  ___\nAsthma  \u2713  ___\nRenal  \u2713  ___\nPregnant  \u2713  ___\nOther  ___  ___\nPast History  ___  ___\nAllergies ____________   Current Medications ____________\nPHYSICAL EXAM:  Normal  Abnormal\nEENT  ___  ___   Thin appearing but\nHeart  ___  ___   active 1yr old female\nLungs  ___  ___   CWT - Patient is deriving from\nAbdomen  ___  ___   Mother during this office visit\nGenitalia  ___  ___\nExtremities  ___  ___\nLAB: Hb. ______  Glucose ______  Malaria ______  Urine ______\nIMPRESSION  Low [strikethrough] Weight\nTREATMENT  Mebendazole use as directed\nInfant formula with Iron\nRTC 1 month\n[signature]\nApril 2013\nPage 19",
+      "overall_confidence": 0.82,
+      "blocks": [
+        {
+          "block_id": "line-1",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "DATE 07/04/14  COMPLAINT parasitos, vitaminas",
+          "confidence": 0.6,
+          "source_type": "handwritten",
+          "bbox": null,
+          "alternatives": [
+            "DATE 02/04/14 COMPLAINT parasitos, vitaminas",
+            "DATE 07/04/14 COMPLAINT parasitos vitaminas"
+          ]
+        },
+        {
+          "block_id": "line-2",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "MALE  (FEMALE)  HT. ______  WT. 19 lbs  B/P ______  TEMP 97.1  PULSE 130",
+          "confidence": 0.6,
+          "source_type": "handwritten",
+          "bbox": null,
+          "alternatives": [
+            "WT. 19 les",
+            "WT. 19 tos",
+            "TEMP 97",
+            "PULSE 150"
+          ]
+        },
+        {
+          "block_id": "line-3",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Sibilancias / Wheezing",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-4",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Dolor de cabeza / Headache",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-5",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Dolor abdominal / Abdominal Pain",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-6",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Problemas para respirar / Breathing Problems",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-7",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Tos / Cough  - well check",
+          "confidence": 0.6,
+          "source_type": "handwritten",
+          "bbox": null,
+          "alternatives": [
+            "- well chec",
+            "- well checd"
+          ]
+        },
+        {
+          "block_id": "line-8",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "- vitamins",
+          "confidence": 0.6,
+          "source_type": "handwritten",
+          "bbox": null,
+          "alternatives": [
+            "- vitaming",
+            "- vitamin g"
+          ]
+        },
+        {
+          "block_id": "line-9",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "El lloro / Crying",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-10",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Fiebre / Fever",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-11",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Dolor de pecho / Chest Pain",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-12",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Problemas menstrual / Menstrual Problems",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-13",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Cargue la perdida / Weight loss",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-14",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Fatiga / Fatigue",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-15",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Diarrea / Diarrhea",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-16",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Nariz Liquida / Runny Nose",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-17",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Apoye el dolor / Back Pain",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-18",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Palidezca/anemia / Pale/Anemia",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-19",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Picaz\u00f3n en los ojos / Itchy Eyes",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-20",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Sudores / Sweats",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-21",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Calambres / Cramps",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-22",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Dolor de hueso / Bone Pain",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-23",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Garganta adolorida / Sore Throat",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-24",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "PERTINENT MEDICAL HISTORY:",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-25",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "The patient is 1yr old and weigh",
+          "confidence": 0.6,
+          "source_type": "handwritten",
+          "bbox": null,
+          "alternatives": [
+            "The patient is 3yr old and weigh",
+            "The patient is 1yo old and weighs"
+          ]
+        },
+        {
+          "block_id": "line-26",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "NO    YES    If yes, explain  19 lbs  Not eating well",
+          "confidence": 0.6,
+          "source_type": "handwritten",
+          "bbox": null,
+          "alternatives": [
+            "14 lbs Not eating well",
+            "19 lbs not eating well"
+          ]
+        },
+        {
+          "block_id": "line-27",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Heart Disease  \u2713  ___   No diarrea.  No N/V.",
+          "confidence": 0.6,
+          "source_type": "handwritten",
+          "bbox": null,
+          "alternatives": [
+            "No diarrhea. No N/V."
+          ]
+        },
+        {
+          "block_id": "line-28",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Hypertension  \u2713  ___",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-29",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Diabetes  \u2713  ___",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-30",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Asthma  \u2713  ___",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-31",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Renal  \u2713  ___",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-32",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Pregnant  \u2713  ___",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-33",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Other  ___  ___",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-34",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Past History  ___  ___",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-35",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Allergies ____________   Current Medications ____________",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-36",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "PHYSICAL EXAM:  Normal  Abnormal",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-37",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "EENT  ___  ___   Thin appearing but",
+          "confidence": 0.6,
+          "source_type": "handwritten",
+          "bbox": null,
+          "alternatives": [
+            "Thin apearing but",
+            "This appearing but"
+          ]
+        },
+        {
+          "block_id": "line-38",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Heart  ___  ___   active 1yr old female",
+          "confidence": 0.6,
+          "source_type": "handwritten",
+          "bbox": null,
+          "alternatives": [
+            "actual 1yr old female",
+            "alert 1yr old female"
+          ]
+        },
+        {
+          "block_id": "line-39",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Lungs  ___  ___   CWT - Patient is deriving from",
+          "confidence": 0.3,
+          "source_type": "handwritten",
+          "bbox": null,
+          "alternatives": [
+            "CW/T - Patient is deriving from",
+            "CV/T - Patient is driving from"
+          ]
+        },
+        {
+          "block_id": "line-40",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Abdomen  ___  ___   Mother during this office visit",
+          "confidence": 0.6,
+          "source_type": "handwritten",
+          "bbox": null,
+          "alternatives": [
+            "Mother deriving this office visit"
+          ]
+        },
+        {
+          "block_id": "line-41",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Genitalia  ___  ___",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-42",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Extremities  ___  ___",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-43",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "LAB: Hb. ______  Glucose ______  Malaria ______  Urine ______",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-44",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "IMPRESSION  Low [strikethrough] Weight",
+          "confidence": 0.6,
+          "source_type": "handwritten",
+          "bbox": null,
+          "alternatives": [
+            "Low birth Weight",
+            "Low Weight"
+          ]
+        },
+        {
+          "block_id": "line-45",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "TREATMENT  Mebendazole use as directed",
+          "confidence": 0.6,
+          "source_type": "handwritten",
+          "bbox": null,
+          "alternatives": [
+            "Mebendazole use as direct",
+            "Mebendazol usa a directe"
+          ]
+        },
+        {
+          "block_id": "line-46",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Infant formula with Iron",
+          "confidence": 0.6,
+          "source_type": "handwritten",
+          "bbox": null,
+          "alternatives": [
+            "Infant formula with iron"
+          ]
+        },
+        {
+          "block_id": "line-47",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "RTC 1 month",
+          "confidence": 0.3,
+          "source_type": "handwritten",
+          "bbox": null,
+          "alternatives": [
+            "R/C 1 month",
+            "RTC 1 mongh"
+          ]
+        },
+        {
+          "block_id": "line-48",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "[signature]",
+          "confidence": 0.3,
+          "source_type": "handwritten",
+          "bbox": null,
+          "alternatives": [
+            "Fanlin",
+            "Jonlin"
+          ]
+        },
+        {
+          "block_id": "line-49",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "April 2013",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-50",
+          "document_id": "document-1",
+          "page": 1,
+          "text": "Page 19",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        }
+      ],
+      "warnings": [
+        "OCR confidence is a legibility signal reported by the model. It is uncalibrated and is not a probability of correctness."
+      ]
+    },
+    {
+      "document_id": "document-2",
+      "file_name": "Prior-Authorization-Form.jpg",
+      "document_type": "Prior Authorization Form (blank fax form)",
+      "raw_text": "PRIOR AUTHORIZATION FORM\n**Please include relevant medical records including laboratory results for review.**\nCOMPLETE AND FAX TO ENVISION RX OPTIONS AT 1-866-422-9119\nPatient Information\nPrescriber Information\nContact Person:\nDate Faxed:\nPatient Name:\nPrescriber Name and Specialty:\nDate of Birth:\nNPI:\nMember ID:\nOffice Phone:\nGroup Number:\nOffice Fax:\nRequested Medication and Diagnosis\nMedication:\nStrength:\nFrequency:\nQuantity:\nDiagnosis:\nExpected Length of Therapy:\nMedical History and Rationale for Prior Authorization Request\nClinical Rationale for Prior Authorization Request: (e.g. history of present utilization, past medical history, etc.)\nList all medications tried and failed, including dose, duration, and outcome of each therapy:\nMedication:\nDate:\nReason for failure:\nThe information contained in this facsimile message, including the attachments, may be privileged, may constitute inside information and is intended only for use of the addressee. If the reader of this message is not the intended recipient, or the employee or agent responsible to deliver it to the intended recipient, you are hereby notified that any dissemination, distribution or copying of this communication is strictly prohibited and may be unlawful. If you have received this communication in error, please immediately notify me by replying to this message and destroy the original message.",
+      "overall_confidence": 0.9258620689655171,
+      "blocks": [
+        {
+          "block_id": "line-1",
+          "document_id": "document-2",
+          "page": 1,
+          "text": "PRIOR AUTHORIZATION FORM",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-2",
+          "document_id": "document-2",
+          "page": 1,
+          "text": "**Please include relevant medical records including laboratory results for review.**",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-3",
+          "document_id": "document-2",
+          "page": 1,
+          "text": "COMPLETE AND FAX TO ENVISION RX OPTIONS AT 1-866-422-9119",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-4",
+          "document_id": "document-2",
+          "page": 1,
+          "text": "Patient Information",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-5",
+          "document_id": "document-2",
+          "page": 1,
+          "text": "Prescriber Information",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-6",
+          "document_id": "document-2",
+          "page": 1,
+          "text": "Contact Person:",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-7",
+          "document_id": "document-2",
+          "page": 1,
+          "text": "Date Faxed:",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-8",
+          "document_id": "document-2",
+          "page": 1,
+          "text": "Patient Name:",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-9",
+          "document_id": "document-2",
+          "page": 1,
+          "text": "Prescriber Name and Specialty:",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-10",
+          "document_id": "document-2",
+          "page": 1,
+          "text": "Date of Birth:",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-11",
+          "document_id": "document-2",
+          "page": 1,
+          "text": "NPI:",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-12",
+          "document_id": "document-2",
+          "page": 1,
+          "text": "Member ID:",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-13",
+          "document_id": "document-2",
+          "page": 1,
+          "text": "Office Phone:",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-14",
+          "document_id": "document-2",
+          "page": 1,
+          "text": "Group Number:",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-15",
+          "document_id": "document-2",
+          "page": 1,
+          "text": "Office Fax:",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-16",
+          "document_id": "document-2",
+          "page": 1,
+          "text": "Requested Medication and Diagnosis",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-17",
+          "document_id": "document-2",
+          "page": 1,
+          "text": "Medication:",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-18",
+          "document_id": "document-2",
+          "page": 1,
+          "text": "Strength:",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-19",
+          "document_id": "document-2",
+          "page": 1,
+          "text": "Frequency:",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-20",
+          "document_id": "document-2",
+          "page": 1,
+          "text": "Quantity:",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-21",
+          "document_id": "document-2",
+          "page": 1,
+          "text": "Diagnosis:",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-22",
+          "document_id": "document-2",
+          "page": 1,
+          "text": "Expected Length of Therapy:",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-23",
+          "document_id": "document-2",
+          "page": 1,
+          "text": "Medical History and Rationale for Prior Authorization Request",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-24",
+          "document_id": "document-2",
+          "page": 1,
+          "text": "Clinical Rationale for Prior Authorization Request: (e.g. history of present utilization, past medical history, etc.)",
+          "confidence": 0.6,
+          "source_type": "handwritten",
+          "bbox": null,
+          "alternatives": [
+            "Clinical Rationale for Prior Authorization Request: (e.g. history of present illness, past medical history, etc.)"
+          ]
+        },
+        {
+          "block_id": "line-25",
+          "document_id": "document-2",
+          "page": 1,
+          "text": "List all medications tried and failed, including dose, duration, and outcome of each therapy:",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-26",
+          "document_id": "document-2",
+          "page": 1,
+          "text": "Medication:",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-27",
+          "document_id": "document-2",
+          "page": 1,
+          "text": "Date:",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-28",
+          "document_id": "document-2",
+          "page": 1,
+          "text": "Reason for failure:",
+          "confidence": 0.95,
+          "source_type": "printed",
+          "bbox": null,
+          "alternatives": []
+        },
+        {
+          "block_id": "line-29",
+          "document_id": "document-2",
+          "page": 1,
+          "text": "The information contained in this facsimile message, including the attachments, may be privileged, may constitute inside information and is intended only for use of the addressee. If the reader of this message is not the intended recipient, or the employee or agent responsible to deliver it to the intended recipient, you are hereby notified that any dissemination, distribution or copying of this communication is strictly prohibited and may be unlawful. If you have received this communication in error, please immediately notify me by replying to this message and destroy the original message.",
+          "confidence": 0.6,
+          "source_type": "handwritten",
+          "bbox": null,
+          "alternatives": [
+            "Standard fax confidentiality notice; fine print partially legible"
+          ]
+        }
+      ],
+      "warnings": [
+        "OCR confidence is a legibility signal reported by the model. It is uncalibrated and is not a probability of correctness."
+      ]
+    }
+  ],
+  "average_confidence": 0.8729310344827585,
+  "provider": "claude",
+  "warnings": []
+}
