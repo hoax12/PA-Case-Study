@@ -67,7 +67,8 @@ rehearsal. Fixture output is not a model result and must never be shown as one.
 | `app/pipeline.py` | the sequence, end to end |
 | `app/providers_claude.py` | the three bounded model calls |
 | `knowledge/policies/*.yaml` | the guideline, as data |
-| `scripts/extract_policy_draft.py` | draft a new payer's YAML for human review |
+| `knowledge/catalog/pa_catalog.yaml` | the payer's PA index — which services need PA at all |
+| `scripts/extract_policy_draft.py` | draft a new payer's YAML for review; `--diff` for revisions |
 | `scripts/evaluate.py` | the metrics |
 | `tests/` | `test_adjudication.py` and `test_registry.py` are the ones that matter |
 

@@ -1,0 +1,229 @@
+# Mass General Brigham Health Plan — Prior Authorization, Notification, and
+# Referral Guidelines ("the PA guide"). This is the payer's own index of which
+# services require PA at all. It is NOT clinical criteria: an entry here can say
+# "PA required, see Medical Policy X", but only an authored policy in
+# knowledge/policies/ can evaluate criteria. The catalog gives the router
+# breadth — every listed service gets an informed referral reason instead of
+# "nothing found" — and its unmatched-but-PA-required hits are the authoring
+# backlog, sorted by request volume.
+#
+# pa_required values:
+#   "yes"    — PA required (for at least the common case)
+#   "no"     — no PA required
+#   "varies" — depends on plan / product / code; the note says how
+#
+# Pages cite the printed page numbers in PAGuide.pdf. Entries are curated from
+# the source table by a human, same review stance as a policy file: a machine
+# draft may propose entries, a person owns what loads.
+
+catalog_id: MGBHP-PA-GUIDE
+title: "Prior Authorization, Notification, and Referral Guidelines"
+payer: "Mass General Brigham Health Plan"
+source_file: PAGuide.pdf
+
+services:
+  - service: "Abortion"
+    page: 3
+    pa_required: "no"
+
+  - service: "Acupuncture"
+    page: 3
+    pa_required: "varies"
+    note: "No PA for office visits within plan limits; PA required for the treatment of pain. See Medical Policy: Acupuncture."
+
+  - service: "Ambulance — Emergency Transportation"
+    aliases: ["emergency ambulance", "specialty care transport"]
+    page: 3
+    pa_required: "no"
+
+  - service: "Ambulance — Non-emergent Transportation"
+    aliases: ["non-emergency transportation", "non-emergent ambulance"]
+    page: 3
+    pa_required: "varies"
+    note: "PA required for commercial members; MGB ACO/MassHealth covered through MassHealth. See Medical Policy: Non-emergency Medically Necessary Transportation."
+
+  - service: "Ambulatory Surgical Procedure"
+    page: 3
+    pa_required: "varies"
+    note: "Not all ambulatory surgical procedures require PA; verify through the MGBHP code checker."
+
+  - service: "Artificial Pancreas Device System"
+    page: 4
+    pa_required: "yes"
+    note: "See Medical Policy: Artificial Pancreas Device System."
+
+  - service: "Autologous Chondrocyte Implantation in the Knee"
+    page: 4
+    pa_required: "yes"
+    note: "See Medical Policy: Autologous Chondrocyte Implantation in the Knee."
+
+  - service: "Bariatric Surgery (Weight Loss Surgery)"
+    aliases: ["bariatric surgery", "weight loss surgery"]
+    page: 4
+    pa_required: "yes"
+    policy_id: MGB-008
+    note: "See Medical Policy: Bariatric Surgery."
+
+  - service: "Blepharoplasty"
+    page: 4
+    pa_required: "yes"
+    note: "See Medical Policy: Reconstructive and Cosmetic Procedures."
+
+  - service: "Bone Growth Stimulation"
+    aliases: ["bone growth stimulator"]
+    page: 4
+    pa_required: "yes"
+    note: "Ultrasound, noninvasive and invasive electric bone growth stimulation. See Medical Policy: Bone Growth Stimulators."
+
+  - service: "Breast Implant Removal"
+    page: 4
+    pa_required: "yes"
+    note: "See Medical Policy: Breast Surgeries; Reconstructive and Cosmetic Procedures."
+
+  - service: "Cardiac Imaging"
+    page: 5
+    pa_required: "varies"
+    note: "PA required for commercial members; not required for MGB ACO/MassHealth, or for MGB ASO members using tier 1 providers."
+
+  - service: "Chiropractic Services"
+    aliases: ["chiropractic visits"]
+    page: 6
+    pa_required: "varies"
+    note: "No PA for MGB ACO/MassHealth within the 20-visit benefit; some commercial plans require PA after the 12th or 20th visit. See Medical Policy: Chiropractic Services."
+
+  - service: "Clinical Trials"
+    page: 6
+    pa_required: "yes"
+    note: "See Medical Policy: Experimental and Investigational."
+
+  - service: "Cochlear Implants and Bone Anchored Hearing Aids"
+    aliases: ["cochlear implant", "bone anchored hearing aid", "baha"]
+    page: 6
+    pa_required: "yes"
+    note: "See Medical Policy: Hearing Devices."
+
+  - service: "Continuous Glucose Monitoring Devices"
+    aliases: ["continuous glucose monitor", "cgm"]
+    page: 6
+    pa_required: "no"
+    note: "See Medical Policy: Continuous Glucose Monitors."
+
+  - service: "Corneal Transplants"
+    aliases: ["corneal transplant"]
+    page: 6
+    pa_required: "yes"
+
+  - service: "Cosmetic/Reconstructive Surgery"
+    aliases: ["cosmetic surgery", "reconstructive surgery"]
+    page: 6
+    pa_required: "yes"
+    note: "See Medical Policies: Breast Surgeries; Reconstructive and Cosmetic Procedures."
+
+  - service: "Durable Medical Equipment (DME)"
+    aliases: ["durable medical equipment", "dme"]
+    page: 7
+    pa_required: "varies"
+    note: "Depends on the type of DME; reference the MGBHP code checker."
+
+  - service: "Elective Inpatient Surgery"
+    page: 7
+    pa_required: "yes"
+    note: "Also see Inpatient Admissions."
+
+  - service: "Enteral, Parenteral and Nutritional Formulas"
+    aliases: ["enteral nutrition", "nutritional formulas"]
+    page: 8
+    pa_required: "yes"
+    note: "See Medical Policy: Enteral Nutrition Formulas and Supplements."
+
+  - service: "Gender Affirming Procedures"
+    page: 8
+    pa_required: "yes"
+    note: "See Medical Policies: Gender Affirming Procedures."
+
+  - service: "Genetic — Molecular Genomic Testing"
+    aliases: ["genetic testing", "genomic testing"]
+    page: 8
+    pa_required: "yes"
+    note: "PA is obtained through EviCore."
+
+  - service: "Hearing Aids"
+    aliases: ["hearing aid"]
+    page: 9
+    pa_required: "yes"
+    note: "Coverage varies by commercial plan for members 22+. See Medical Policy: Hearing Devices."
+
+  - service: "High Tech Radiology (CT, MRI, MRA, PET)"
+    aliases: ["ct scan", "mri", "mra", "pet scan", "high tech radiology"]
+    page: 9
+    pa_required: "varies"
+    note: "PA required for commercial outpatient non-emergent studies; not required for MGB ACO/MassHealth, or for MGB ASO members using tier 1 providers."
+
+  - service: "Home Health Services"
+    aliases: ["home health", "skilled nursing at home"]
+    page: 9
+    pa_required: "varies"
+    note: "Commercial: no PA. MGB ACO/MassHealth: PA required (two post-partum home visits exempt). See Medical Policy: Home Health Care."
+
+  - service: "Nuclear Stress Tests"
+    aliases: ["nuclear stress test"]
+    page: 12
+    pa_required: "no"
+
+  - service: "Observation Services"
+    page: 12
+    pa_required: "no"
+    note: "Claims pay up to 48 hours of observation stay."
+
+  - service: "Oral Surgery and Oral Maxillofacial Surgery"
+    aliases: ["oral surgery", "maxillofacial surgery"]
+    page: 12
+    pa_required: "yes"
+    note: "See Medical Policy: Oral & Maxillofacial Surgery & Procedures."
+
+  - service: "Outpatient Therapy (Physical, Occupational, Speech)"
+    aliases: ["physical therapy", "occupational therapy", "speech therapy"]
+    page: 13
+    pa_required: "varies"
+    note: "Commercial: no PA. MGB ACO/MassHealth: initial evaluation exempt, subsequent visits require PA. See Medical Policy: Definition of Skilled Care."
+
+  - service: "Panniculectomy"
+    page: 13
+    pa_required: "yes"
+    note: "See Medical Policy: Reconstructive and Cosmetic Procedures."
+
+  - service: "Radiation Therapy (outpatient)"
+    aliases: ["radiation therapy"]
+    page: 13
+    pa_required: "no"
+
+  - service: "Rhinoplasty"
+    page: 13
+    pa_required: "yes"
+    note: "See Medical Policy: Reconstructive and Cosmetic Procedures."
+
+  - service: "Septoplasty"
+    page: 13
+    pa_required: "yes"
+    note: "See Medical Policy: Reconstructive and Cosmetic Procedures."
+
+  - service: "Sleep Studies"
+    aliases: ["sleep study", "pap therapy", "obstructive sleep apnea surgery"]
+    page: 14
+    pa_required: "yes"
+    note: "See CareCentrix clinical criteria for sleep disordered breathing in adults."
+
+  - service: "Spinal Surgery"
+    page: 14
+    pa_required: "yes"
+    note: "PA required for elective surgery."
+
+  - service: "Transplants (organ, bone marrow and stem cell)"
+    aliases: ["organ transplant", "bone marrow transplant", "stem cell transplant"]
+    page: 14
+    pa_required: "yes"
+    note: "Surgery sites must be in the Optum Transplant Network (except PPO plans)."
+
+  - service: "Urine Drug Testing"
+    page: 14
+    pa_required: "no"

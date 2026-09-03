@@ -7,6 +7,13 @@ it. It never writes a file the application will load - output goes to
 coverage is reviewed by a person before it is used.
 
     python scripts/extract_policy_draft.py knowledge/source/BariatricSurgery.pdf
+
+When a payer revises a policy, diff the new draft against the live file so a
+human re-reviews only the changed clauses, not the whole document:
+
+    python scripts/extract_policy_draft.py --diff \
+        knowledge/policies/mgb_008_bariatric.yaml \
+        knowledge/policies/_draft_bariatricsurgery.yaml
 """
 
 from __future__ import annotations
@@ -46,9 +53,18 @@ Rules:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("pdf", type=Path, help="Source guideline PDF")
+    parser.add_argument("pdf", type=Path, help="Source guideline PDF, or with --diff the CURRENT policy YAML")
     parser.add_argument("--out", type=Path, default=None)
+    parser.add_argument(
+        "--diff",
+        type=Path,
+        metavar="NEW_YAML",
+        help="Compare the current policy YAML (positional) against this new draft, clause by clause. Local only; no model call.",
+    )
     arguments = parser.parse_args()
+
+    if arguments.diff:
+        raise SystemExit(diff_policies(arguments.pdf, arguments.diff))
 
     settings = get_settings()
     if not settings.anthropic_api_key:
@@ -116,6 +132,49 @@ def main() -> None:
         for item in drifted:
             print(f"  - {item}")
     print("\nReview the draft, then rename it without the leading underscore.")
+
+
+def diff_policies(current_path: Path, new_path: Path) -> int:
+    """Clause-level diff of two policy files, so review effort goes only to change.
+
+    Returns 0 when identical, 1 when there is anything to review.
+    """
+
+    def clauses(path: Path) -> dict[str, dict]:
+        policy = Policy.model_validate(yaml.safe_load(path.read_text(encoding="utf-8")))
+        return {
+            criterion.id: criterion.model_dump(mode="json")
+            for criteria_set in policy.criteria_sets.values()
+            for criterion in criteria_set.items
+        }
+
+    current, new = clauses(current_path), clauses(new_path)
+    added = sorted(set(new) - set(current))
+    removed = sorted(set(current) - set(new))
+    changed: list[str] = []
+    for clause_id in sorted(set(current) & set(new)):
+        fields = [
+            field
+            for field in ("text", "page", "predicate")
+            if current[clause_id].get(field) != new[clause_id].get(field)
+        ]
+        if fields:
+            changed.append(f"{clause_id}: {', '.join(fields)} changed")
+
+    if not (added or removed or changed):
+        print(f"No clause-level changes between {current_path.name} and {new_path.name}.")
+        return 0
+    for label, items in (("Added", added), ("Removed", removed), ("Changed", changed)):
+        if items:
+            print(f"{label} ({len(items)}):")
+            for item in items:
+                print(f"  - {item}")
+    unchanged = len(set(current) & set(new)) - len(changed)
+    print(
+        f"\n{unchanged} clauses unchanged and need no re-review; "
+        f"{len(added) + len(changed)} need human review before the new file can load."
+    )
+    return 1
 
 
 def _verify_against_source(policy: Policy, pdf_path: Path) -> tuple[int, list[str]]:

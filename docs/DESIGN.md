@@ -136,18 +136,44 @@ source is worse than no citation, so it is enforced rather than trusted.
 
 ### Scaling to many policies
 
-Nothing above is specific to one file. The registry loads every
-`knowledge/policies/*.yaml` at startup; routing matches line of business,
-procedure aliases, and plan pathway across all of them, and a request that
-matches none refers with a `NoRouteReason` naming what was looked for — which is
-also the production signal for *which policy to author next*. The marginal cost
-of payer N+1 is authoring one YAML (drafted by `extract_policy_draft.py`,
-reviewed by a person), not touching code: the six predicate types are closed
-over *how clauses decide*, and a new clause shape would surface as a draft the
-schema rejects rather than a silent misread. At hundreds of policies the flat
-directory becomes a database-backed registry with per-tenant scoping, but the
-unit of knowledge — a versioned, human-approved set of typed predicates with
-verbatim citations — does not change shape.
+The scaling question is not "must someone author a YAML per policy?" — it is
+"how small can the human review per policy get?" That cost exists in every
+architecture (a retrieval system still needs per-policy evaluation before it
+touches real requests); this design makes it small, targeted, and shrinking.
+Three tiers, all implemented:
+
+**Breadth first: the payer's own PA index as a catalog.** The payer publishes
+an index of *which services need PA at all* — for MGB, the Prior Authorization,
+Notification, and Referral Guidelines. `knowledge/catalog/pa_catalog.yaml`
+holds it as data (38 services, yes/no/varies, page-cited), and routing consults
+it whenever no criteria policy matches. So every cataloged service gets an
+informed answer on day one: *"the PA guide (p. 12) lists 'Nuclear Stress Tests'
+as not requiring prior authorization"*, or *"'Spinal Surgery' requires prior
+authorization, but the governing medical policy is not yet authored — a
+reviewer must adjudicate."* An entry can never adjudicate — only an authored
+policy holds criteria — but a referral that names the payer's own index beats
+"nothing found." The catalog entry for a held policy defers to real routing.
+
+**Depth on demand.** Criteria policies are authored in request-volume order,
+not upfront: every catalog-informed miss carries a `catalog_service` field, so
+production telemetry *is* the authoring backlog. Authoring payer N+1 is
+`extract_policy_draft.py` (model drafts the YAML, verifier flags every clause
+it cannot find verbatim on its cited page, a human reviews only the flags and
+renames the file) — zero code, because the six predicate types are closed over
+*how clauses decide*, not what they are about.
+
+**Updates re-review only the change.** When a payer revises a policy,
+`extract_policy_draft.py --diff` compares the new draft against the live file
+clause by clause and reports added, removed, and changed (text / page /
+predicate) criteria — so a revision to 2 of 44 clauses costs review of 2, not
+44. Combined with `source_sha256` staleness detection, the update loop is:
+hash mismatch → redraft → clause diff → review the delta → rename.
+
+At hundreds of policies the flat directory becomes a database-backed registry
+with effective/termination dates, per-tenant scoping, and an approval workflow
+UI for clinical policy staff — but the unit of knowledge (a versioned,
+human-approved set of typed predicates with verbatim citations) does not change
+shape. The human never leaves the loop; the loop just gets cheap.
 
 ### Updates and versioning
 
@@ -493,8 +519,11 @@ more than one that is not.
   hand-set constants, reported as a band. It is not a probability.
 - **Evaluation data is synthetic.** Rendered text, not scans: no skew, no noise,
   no cursive. Real handwriting is the largest untested risk in the OCR step.
-- **One policy, one specialty.** The representation is designed to generalize and
-  the drafting script exists, but only MGB-008 has been authored and verified.
+- **One criteria policy, one specialty.** The PA catalog gives every listed
+  service an informed routing answer, but only MGB-008 has authored, verified
+  criteria — every other PA-required service refers with "policy not yet
+  authored." The drafting, verification, and diff tooling for the next policy
+  exists; the next policy itself does not.
 - **Not production-ready for PHI.** No authentication, authorization, tenancy,
   encrypted storage, retention policy, audit immutability, or BAA-covered
   deployment. In-process background work does not survive a restart.

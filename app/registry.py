@@ -180,6 +180,32 @@ class NoRouteReason(BaseModel):
     line_of_business: str | None = None
     procedure: str | None = None
     nearest_clauses: list[str] = Field(default_factory=list)
+    # Set when the payer's PA catalog knows the service even though no criteria
+    # policy is held. This is the authoring-backlog telemetry signal.
+    catalog_service: str | None = None
+
+
+class PaCatalogEntry(BaseModel):
+    """One row of the payer's PA/notification/referral index.
+
+    An entry says whether a service needs PA at all; it never carries criteria.
+    Only an authored policy in knowledge/policies/ can evaluate a request.
+    """
+
+    service: str
+    page: int
+    pa_required: Literal["yes", "no", "varies"]
+    aliases: list[str] = Field(default_factory=list)
+    note: str | None = None
+    policy_id: str | None = None
+
+
+class PaCatalog(BaseModel):
+    catalog_id: str
+    title: str
+    payer: str
+    source_file: str
+    services: list[PaCatalogEntry]
 
 
 def normalize_clause(value: str) -> str:
@@ -211,7 +237,9 @@ class CriteriaRegistry:
         )
         self.policies: dict[str, Policy] = {}
         self._criteria_by_id: dict[str, Criterion] = {}
+        self.catalog: PaCatalog | None = None
         self._load()
+        self._load_catalog()
 
     def _load(self) -> None:
         if not self.policies_dir.is_dir():
@@ -235,6 +263,33 @@ class CriteriaRegistry:
         if not self.policies:
             raise ValueError(f"No policy files found in {self.policies_dir}")
 
+    def _load_catalog(self) -> None:
+        """The payer's PA index is optional; without it routing works as before."""
+
+        path = self.policies_dir.parent / "catalog" / "pa_catalog.yaml"
+        if path.is_file():
+            self.catalog = PaCatalog.model_validate(
+                yaml.safe_load(path.read_text(encoding="utf-8"))
+            )
+
+    def catalog_lookup(self, procedure: str) -> PaCatalogEntry | None:
+        """Match a requested service against the PA catalog by name or alias."""
+
+        if self.catalog is None or not procedure:
+            return None
+        procedure_key = normalization_key(procedure)
+        for entry in self.catalog.services:
+            names = {normalization_key(entry.service)} | {
+                normalization_key(alias) for alias in entry.aliases
+            }
+            # Token-boundary containment: alias "mri" matches "mri brain",
+            # never the inside of another word.
+            if procedure_key in names or any(
+                name and f"-{name}-" in f"-{procedure_key}-" for name in names
+            ):
+                return entry
+        return None
+
     # -- routing ---------------------------------------------------------------
 
     def route(
@@ -254,6 +309,7 @@ class CriteriaRegistry:
             )
         lob_key = normalization_key(line_of_business)
         procedure_key = normalization_key(procedure)
+        miss: NoRouteReason | None = None
         for policy in self.policies.values():
             for pathway in policy.pathways:
                 if lob_key not in {
@@ -299,7 +355,9 @@ class CriteriaRegistry:
                                 for code in codes
                             ),
                         )
-                return NoRouteReason(
+                # Remember the miss but keep looking: another policy, or the PA
+                # catalog, may still know this service.
+                miss = miss or NoRouteReason(
                     reason=(
                         f"No criteria in {policy.policy_id} cover "
                         f"'{procedure}' under the {pathway.id} pathway."
@@ -308,7 +366,39 @@ class CriteriaRegistry:
                     procedure=procedure,
                     nearest_clauses=[item.id for item in self.search(procedure, 3)],
                 )
-        return NoRouteReason(
+        entry = self.catalog_lookup(procedure)
+        if entry is not None and entry.policy_id in self.policies:
+            # The catalog points at a policy we hold, so "not yet authored" would
+            # be false — the routing miss above is the truthful reason.
+            entry = None
+        if entry is not None:
+            guide = f"the {self.catalog.title} (p. {entry.page})"  # type: ignore[union-attr]
+            if entry.pa_required == "no":
+                reason = (
+                    f"{guide} lists '{entry.service}' as not requiring prior "
+                    "authorization. A reviewer should confirm plan-specific rules "
+                    "and close the request without a criteria adjudication."
+                )
+            else:
+                qualifier = (
+                    "requires prior authorization"
+                    if entry.pa_required == "yes"
+                    else "requires prior authorization for some plans"
+                )
+                reason = (
+                    f"{guide} states '{entry.service}' {qualifier}, but the "
+                    "governing medical policy is not yet authored in this system, "
+                    "so a reviewer must adjudicate it."
+                )
+            if entry.note:
+                reason += f" ({entry.note})"
+            return NoRouteReason(
+                reason=reason,
+                line_of_business=line_of_business,
+                procedure=procedure,
+                catalog_service=entry.service,
+            )
+        return miss or NoRouteReason(
             reason=(
                 "No indexed policy covers this request. A guideline for this plan "
                 "and service must be loaded before it can be adjudicated."
@@ -415,7 +505,20 @@ class CriteriaRegistry:
                     ),
                 }
             )
-        return {"ready": True, "policies": policies}
+        return {
+            "ready": True,
+            "policies": policies,
+            "pa_catalog": (
+                {
+                    "catalog_id": self.catalog.catalog_id,
+                    "payer": self.catalog.payer,
+                    "source_file": self.catalog.source_file,
+                    "services": len(self.catalog.services),
+                }
+                if self.catalog
+                else None
+            ),
+        }
 
 
 @lru_cache(maxsize=1)

@@ -187,3 +187,54 @@ def test_catch_all_does_not_leak_into_unrelated_services(
     result = registry.route("Medicare Advantage", "screening colonoscopy")
     assert isinstance(result, RouteResult)
     assert result.criteria_ref.startswith("external:")
+
+
+# -- the PA catalog: breadth without criteria ---------------------------------
+
+
+def test_catalog_loads_from_the_pa_guide(registry: CriteriaRegistry) -> None:
+    assert registry.catalog is not None
+    assert registry.catalog.catalog_id == "MGBHP-PA-GUIDE"
+    assert len(registry.catalog.services) >= 30
+
+
+def test_pa_required_service_without_a_policy_gets_an_informed_referral(
+    registry: CriteriaRegistry,
+) -> None:
+    result = registry.route("commercial", "Spinal Surgery")
+    assert isinstance(result, NoRouteReason)
+    assert result.catalog_service == "Spinal Surgery"
+    assert "requires prior authorization" in result.reason
+    assert "not yet authored" in result.reason
+
+
+def test_no_pa_service_says_so_instead_of_nothing_found(
+    registry: CriteriaRegistry,
+) -> None:
+    result = registry.route("commercial", "nuclear stress test")
+    assert isinstance(result, NoRouteReason)
+    assert result.catalog_service == "Nuclear Stress Tests"
+    assert "not requiring prior authorization" in result.reason
+
+
+def test_catalog_alias_matches_inside_a_longer_request(
+    registry: CriteriaRegistry,
+) -> None:
+    result = registry.route("commercial", "MRI brain with contrast")
+    assert isinstance(result, NoRouteReason)
+    assert result.catalog_service == "High Tech Radiology (CT, MRI, MRA, PET)"
+    assert "some plans" in result.reason
+
+
+def test_catalog_never_shadows_a_held_policy(registry: CriteriaRegistry) -> None:
+    """Bariatric surgery is in the catalog AND held; routing must win."""
+
+    result = registry.route("commercial", "Transoral outlet reduction (TORe)")
+    assert isinstance(result, RouteResult)
+    assert result.policy_id == "MGB-008"
+
+
+def test_status_reports_the_catalog(registry: CriteriaRegistry) -> None:
+    status = registry.status()
+    assert status["pa_catalog"]["catalog_id"] == "MGBHP-PA-GUIDE"
+    assert status["pa_catalog"]["services"] >= 30
