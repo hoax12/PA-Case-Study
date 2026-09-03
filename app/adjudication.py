@@ -69,6 +69,8 @@ class CriterionResult(BaseModel):
     predicate_type: str
     evidence: CriterionEvidence | None = None
     confidence: float = Field(ge=0, le=1)
+    missing: str | None = None
+    """When UNKNOWN because information is obtainable, what to request and from whom."""
 
 
 class Adjudication(BaseModel):
@@ -123,6 +125,7 @@ def evaluate_criterion(
             status=CriterionStatus.UNKNOWN,
             reason="No evidence in the submitted packet addresses this criterion.",
             confidence=0.0,
+            missing=f"Ask the ordering provider for {_requestable(predicate, criterion.text)}.",
         )
 
     if ocr is not None and not evidence_is_traceable(evidence, ocr):
@@ -134,6 +137,10 @@ def evaluate_criterion(
                 "so it cannot be relied on."
             ),
             confidence=0.0,
+            missing=(
+                f"Ask the ordering provider to re-submit a legible copy of the "
+                f"document containing {_requestable(predicate, criterion.text)}."
+            ),
         )
 
     if isinstance(predicate, ThresholdPredicate):
@@ -143,6 +150,21 @@ def evaluate_criterion(
     if isinstance(predicate, EnumPredicate):
         return _evaluate_enum(predicate, evidence, base)
     return _evaluate_boolean(predicate, evidence, base)
+
+
+def _requestable(predicate, clause_text: str) -> str:
+    """Phrase what a submitter would have to provide to resolve an UNKNOWN."""
+
+    if isinstance(predicate, ThresholdPredicate):
+        return f"a documented {predicate.field.replace('_', ' ')} value"
+    if isinstance(predicate, TemporalPredicate):
+        return f"the {predicate.anchor.replace('_', ' ')}"
+    if isinstance(predicate, EnumPredicate):
+        return f"documentation of the {predicate.field.replace('_', ' ')}"
+    clipped = clause_text if len(clause_text) <= 100 else clause_text[:97] + "..."
+    if isinstance(predicate, AttestationPredicate):
+        return f'a signed attestation addressing: "{clipped}"'
+    return f'documentation addressing: "{clipped}"'
 
 
 def evidence_is_traceable(evidence: CriterionEvidence, ocr: OcrBatchResult) -> bool:
@@ -168,6 +190,10 @@ def _evaluate_threshold(
             status=CriterionStatus.UNKNOWN,
             reason=f"No numeric value for {predicate.field} was found in the packet.",
             confidence=0.0,
+            missing=(
+                f"Ask the ordering provider for a documented "
+                f"{predicate.field.replace('_', ' ')} value."
+            ),
         )
     band = predicate.unknown_band
     if band and band[0] <= number < band[1]:
@@ -224,6 +250,10 @@ def _evaluate_temporal(
                 "which is not present in the packet."
             ),
             confidence=0.0,
+            missing=(
+                f"Ask the submitter for the {predicate.relative_to.replace('_', ' ')} "
+                "of this request."
+            ),
         )
 
     resolved = parse_date(raw)
@@ -236,6 +266,10 @@ def _evaluate_temporal(
                 "in the packet."
             ),
             confidence=0.0,
+            missing=(
+                f"Ask the ordering provider for the "
+                f"{predicate.anchor.replace('_', ' ')}."
+            ),
         )
 
     verdicts = {
@@ -255,6 +289,11 @@ def _evaluate_temporal(
                 "about this window, so the date must be confirmed."
             ),
             confidence=0.0,
+            missing=(
+                f"Ask the ordering provider to confirm the "
+                f"{predicate.anchor.replace('_', ' ')} written '{resolved.raw}' — "
+                "it can be read more than one way."
+            ),
         )
 
     satisfied = next(iter(verdicts.values()))
@@ -312,6 +351,10 @@ def _evaluate_enum(
             status=CriterionStatus.UNKNOWN,
             reason=f"No value for {predicate.field} was found in the packet.",
             confidence=0.0,
+            missing=(
+                f"Ask the ordering provider for documentation of the "
+                f"{predicate.field.replace('_', ' ')}."
+            ),
         )
     allowed = {item.casefold() for item in predicate.allowed}
     satisfied = value.casefold() in allowed
@@ -355,6 +398,7 @@ def _evaluate_boolean(
             f"an explicit {kind} is required."
         ),
         confidence=0.0,
+        missing=f"Ask the ordering provider for {_requestable(predicate, base['clause_text'])}.",
     )
 
 
@@ -526,7 +570,13 @@ def _rationale(
         f"{result.reason}"
         for result in blocking[:8]
     ]
-    return (
+    text = (
         f"{header} The request is referred to a licensed clinical reviewer because "
         f"the following criteria are not established:\n" + "\n".join(lines)
     )
+    requests = [result.missing for result in blocking if result.missing]
+    if requests:
+        text += "\n\nTo resolve before re-submission:\n" + "\n".join(
+            f"- {request}" for request in requests[:8]
+        )
+    return text

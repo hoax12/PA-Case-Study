@@ -4,12 +4,10 @@
 Deep-dive areas: **Knowledge Management** and **Evaluation**.
 
 > **Document status.** This file describes the system as it stands today. The
-> other files in `docs/` (`ARCHITECTURE.md`, `KNOWLEDGE_BASE.md`,
-> `EVALUATION_PLAN.md`, `API_AND_DATA_MODEL.md`, `DECISIONS_AND_LIMITATIONS.md`,
-> `DEMO_RUNBOOK.md`, `OPERATIONS.md`) were written for the earlier build, which
-> used Google ADK, Gemini, and a FAISS/MiniLM chunk index. All three are gone.
-> Those documents are kept for history but are **no longer accurate**; read this
-> one. `REBUILD_SPEC.md` is the implementation brief this rebuild followed.
+> files in `docs/legacy/` were written for the earlier build, which used Google
+> ADK, Gemini, and a FAISS/MiniLM chunk index. All three are gone. Those
+> documents are kept for history but are **no longer accurate**; read this one.
+> `REBUILD_SPEC.md` is the implementation brief this rebuild followed.
 
 ---
 
@@ -22,7 +20,12 @@ span:
 
 - **Provisional affirmation** — every criterion in the governing policy is met on
   cited evidence, above a confidence threshold. No person needs to look at it.
-- **Refer to human clinical review** — anything else.
+- **Refer to human clinical review** — anything else. A referral is not a bare
+  hand-off: it names the blocking clauses, and for every criterion that failed on
+  *missing* information (as opposed to contradicting evidence) it states what to
+  request and from whom — "ask the ordering provider for a documented BMI value",
+  "confirm the primary surgery date written '09/03/25' — it can be read more than
+  one way". The reviewer starts with a work order, not a puzzle.
 
 It cannot produce a denial. Not "is instructed not to" — cannot; see §7.
 
@@ -130,6 +133,21 @@ re-reads the source PDF and asserts that all 44 clause strings appear, after
 whitespace and typography folding, on the page each one claims. A paraphrase, a
 typo, or a renumbered page fails the build. A citation that does not match the
 source is worse than no citation, so it is enforced rather than trusted.
+
+### Scaling to many policies
+
+Nothing above is specific to one file. The registry loads every
+`knowledge/policies/*.yaml` at startup; routing matches line of business,
+procedure aliases, and plan pathway across all of them, and a request that
+matches none refers with a `NoRouteReason` naming what was looked for — which is
+also the production signal for *which policy to author next*. The marginal cost
+of payer N+1 is authoring one YAML (drafted by `extract_policy_draft.py`,
+reviewed by a person), not touching code: the six predicate types are closed
+over *how clauses decide*, and a new clause shape would surface as a draft the
+schema rejects rather than a silent misread. At hundreds of policies the flat
+directory becomes a database-backed registry with per-tenant scoping, but the
+unit of knowledge — a versioned, human-approved set of typed predicates with
+verbatim citations — does not change shape.
 
 ### Updates and versioning
 

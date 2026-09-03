@@ -23,13 +23,21 @@ function renderAdjudication(adjudication) {
   $("#policyEffective").textContent = `Effective ${adjudication.policy_effective_date || "—"}`;
   $("#policyPathway").textContent = `Pathway ${adjudication.pathway_id || "—"}`;
 
-  // A referral is only useful if it says what is blocking it.
+  // A referral is only useful if it says what is blocking it — and what to
+  // request, from whom, to unblock it.
   const reasons = adjudication.refer_reasons || [];
+  const missing = criteria
+    .filter((item) => item.missing)
+    .map((item) => `<li><strong>${escapeHtml(item.criterion_id)}</strong> — ${escapeHtml(item.missing)}</li>`);
   const reasonBox = $("#referReasons");
-  reasonBox.classList.toggle("hidden", reasons.length === 0);
-  reasonBox.innerHTML = reasons.length
-    ? `<strong>${reasons.length} reason${reasons.length === 1 ? "" : "s"} this needs a reviewer</strong><ul>${reasons.map((reason) => `<li>${escapeHtml(reason)}</li>`).join("")}</ul>`
-    : "";
+  reasonBox.classList.toggle("hidden", reasons.length === 0 && missing.length === 0);
+  reasonBox.innerHTML =
+    (reasons.length
+      ? `<strong>${reasons.length} reason${reasons.length === 1 ? "" : "s"} this needs a reviewer</strong><ul>${reasons.map((reason) => `<li>${escapeHtml(reason)}</li>`).join("")}</ul>`
+      : "") +
+    (missing.length
+      ? `<strong>Missing information — what to request</strong><ul>${missing.join("")}</ul>`
+      : "");
 
   const overrides = new Map(
     (state.job?.reviewer_decisions || [])

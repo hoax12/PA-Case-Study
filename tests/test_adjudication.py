@@ -245,6 +245,52 @@ def test_missing_anchor_date_is_unknown(registry: CriteriaRegistry) -> None:
     assert "order date" in outcome.reason
 
 
+# -- a referral names what is missing and whom to ask -------------------------
+
+
+def test_absent_evidence_says_what_to_request_and_from_whom(
+    registry: CriteriaRegistry, context: DecisionContext
+) -> None:
+    criterion = registry.clause("MGB-008.TORe.5")
+    outcome = evaluate_criterion(
+        criterion, evidence("MGB-008.TORe.5", found=False), context
+    )
+    assert outcome.missing is not None
+    assert "ordering provider" in outcome.missing
+    assert "primary surgery date" in outcome.missing
+
+
+def test_ambiguous_date_asks_for_confirmation_of_the_raw_string(
+    registry: CriteriaRegistry, context: DecisionContext
+) -> None:
+    outcome = temporal_case(registry, "09/03/25", context)
+    assert outcome.missing is not None
+    assert "'09/03/25'" in outcome.missing
+
+
+def test_met_criterion_has_nothing_missing(
+    registry: CriteriaRegistry, context: DecisionContext
+) -> None:
+    outcome = temporal_case(registry, "2025-03-10", context)
+    assert outcome.status is CriterionStatus.MET
+    assert outcome.missing is None
+
+
+def test_referral_rationale_lists_the_requests(
+    registry: CriteriaRegistry, context: DecisionContext
+) -> None:
+    criterion = registry.clause("MGB-008.TORe.5")
+    unknown = evaluate_criterion(
+        criterion, evidence("MGB-008.TORe.5", found=False), context
+    )
+    adjudication = decide(
+        [result(CriterionStatus.MET), unknown], route(), DECISION_DATE
+    )
+    assert adjudication.outcome is Outcome.REFER_TO_HUMAN
+    assert "To resolve before re-submission:" in adjudication.rationale
+    assert "ordering provider" in adjudication.rationale
+
+
 # -- the tobacco lookback, anchored to the surgery date -----------------------
 
 

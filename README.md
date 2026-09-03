@@ -7,7 +7,9 @@ two outcomes:
 
 - **Provisional affirmation** — every criterion is met, each citing the clause and
   page it was checked against. Reversible, and never final.
-- **Refer to human** — anything else, with the blocking clauses named.
+- **Refer to human** — anything else, with the blocking clauses named and, for
+  each criterion that failed on missing information, what to request and from
+  whom (e.g. "ask the ordering provider for a documented BMI value").
 
 There is no third outcome. `Outcome` is an enum with two members, `decide()` is a
 pure function over evaluated criteria, and a denial can enter the record only
@@ -69,9 +71,9 @@ rehearsal. Fixture output is not a model result and must never be shown as one.
 | `scripts/evaluate.py` | the metrics |
 | `tests/` | `test_adjudication.py` and `test_registry.py` are the ones that matter |
 
-The other files in `docs/` predate this build and describe a removed Google ADK /
-Gemini / FAISS prototype. They are kept only as a record of what was replaced;
-`DESIGN.md` supersedes all of them.
+The files in `docs/legacy/` predate this build and describe a removed Google
+ADK / Gemini / FAISS prototype. They are kept only as a record of what was
+replaced; `DESIGN.md` supersedes all of them.
 
 ## Limitations
 
