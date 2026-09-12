@@ -30,6 +30,8 @@ assumptions, written for a reader with no prior context.
 representation, the temporal engine, the evaluation methodology and its results,
 the deployment and feedback plan, and the limitations.
 
+**Demo video:** https://www.youtube.com/watch?v=QrXxezvchZM
+
 Measured over eight synthetic packets against Claude Opus 5:
 
 | metric | result |
